@@ -1,0 +1,30 @@
+# Dependências do Node (NUNCA enviar para o Git)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variáveis de Ambiente / Segredos (Contém senhas do banco de dados)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Banco de dados local (Evita enviar o teu SQLite de teste para produção)
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos de configuração da IDE (VS Code / IntelliJ)
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db

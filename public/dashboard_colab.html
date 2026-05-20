@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>StepUp | Dashboard Pessoal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "primary": "#006579",
+              "primary-container": "#197f96",
+              "on-primary-container": "#f9fdff",
+              "surface": "#f7f9fb",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-high": "#e6e8ea",
+              "surface-container-lowest": "#ffffff",
+              "surface-variant": "#e0e3e5",
+              "on-surface": "#191c1e",
+              "on-surface-variant": "#3e484c",
+              "outline": "#6f797c",
+              "outline-variant": "#bec8cc",
+              "error": "#E11D48",
+              "error-container": "#ffdad6",
+              "deep-navy": "#0F172A",
+              "slate-gray": "#64748B",
+              "lime-accent": "#00D3DC",
+              "success": "#10B981"
+            },
+            "fontFamily": {
+              "body-md": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "display-lg": ["Hanken Grotesk"],
+              "label-md": ["Hanken Grotesk"]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .animate-spin-slow { animation: spin 3s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-surface text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+
+    <nav class="hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-outline-variant bg-deep-navy w-64 z-50">
+        <div class="flex items-center px-6 py-6 border-b border-surface-variant/20 justify-center">
+            <img alt="StepUp Logo" class="h-12 w-auto object-contain" src="https://i.imgur.com/ousYcRL.png"/>
+        </div>
+        <div class="flex-1 flex flex-col gap-2 px-4 pt-6 overflow-y-auto">
+            <a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-semibold transition-all cursor-pointer" href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard Pessoal
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-gray hover:bg-white/5 hover:text-white transition-all cursor-pointer rounded-lg" href="#" onclick="alert('Redirecionando para visão de gestão (Em breve)...')">
+                <span class="material-symbols-outlined">groups</span>
+                Visão do RH / Gestor
+            </a>
+        </div>
+        <div class="flex flex-col gap-2 px-4 py-4 border-t border-surface-variant/20">
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-gray hover:text-white transition-all cursor-pointer rounded-lg" href="#">
+                <span class="material-symbols-outlined">help</span>Suporte
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-gray hover:text-error transition-all cursor-pointer rounded-lg" href="/" >
+                <span class="material-symbols-outlined">logout</span>Sair
+            </a>
+        </div>
+    </nav>
+
+    <nav class="md:hidden flex justify-between items-center px-6 h-16 w-full sticky top-0 z-50 bg-surface-container-lowest border-b border-outline-variant">
+        <div class="flex items-center gap-2">
+            <img alt="StepUp Logo" class="h-8 w-auto" src="https://i.imgur.com/ousYcRL.png"/>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="user-badge-mobile" class="text-xs font-bold bg-primary/10 text-primary px-2 py-1 rounded">Carregando...</span>
+        </div>
+    </nav>
+
+    <main class="flex-1 md:ml-64 flex flex-col min-h-screen bg-surface">
+        
+        <header class="hidden md:flex justify-between items-center px-10 h-16 w-full sticky top-0 z-40 bg-surface-container-lowest border-b border-outline-variant">
+            <div class="flex items-center gap-4 text-on-surface-variant">
+                <span class="text-xs font-bold uppercase tracking-wider text-primary">Integração</span>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <span id="header-breadcrumb" class="text-xs font-semibold">Dashboard Pessoal</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col text-right">
+                    <span id="user-fullname" class="text-sm font-bold text-deep-navy">Carregando...</span>
+                    <span id="user-role" class="text-xs text-slate-gray">Novo Colaborador</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold shadow-inner">
+                    <span id="user-initials">--</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 p-6 md:p-10 max-w-[1440px] mx-auto w-full flex flex-col gap-6">
+            
+            <div id="block-banner" class="hidden bg-error-container border-l-4 border-error p-4 rounded-r-xl items-start gap-4 shadow-sm animate-pulse">
+                <span class="material-symbols-outlined text-error text-2xl">warning_amber</span>
+                <div class="flex-grow">
+                    <h4 class="font-bold text-on-error-container text-sm">Atenção: Seu processo possui um impedimento</h4>
+                    <p id="block-reason" class="text-xs text-on-error-container/80 mt-0.5">Seu onboarding foi pausado temporariamente pelo RH devido a pendências externas.</p>
+                </div>
+            </div>
+
+            <section class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-sm">
+                <div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-primary-container/5 to-transparent pointer-events-none"></div>
+                <div class="flex flex-col gap-1 z-10">
+                    <h1 class="text-3xl font-black text-deep-navy">Olá, <span id="welcome-name">Colaborador</span>!</h1>
+                    <p class="text-sm text-slate-gray">Status atual da sua jornada: <span id="current-phase-text" class="font-bold text-primary">Carregando...</span></p>
+                </div>
+                
+                <div class="z-10 bg-surface-container-low rounded-xl px-6 py-4 border border-outline-variant flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full border-4 border-surface bg-white flex items-center justify-center relative shadow-sm">
+                        <svg class="w-full h-full -rotate-90 absolute" viewBox="0 0 36 36">
+                            <path class="text-surface-variant stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3.5"></path>
+                            <path id="progress-circle" class="text-primary stroke-current transition-all duration-1000" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="0, 100" stroke-linecap="round" stroke-width="3.5"></path>
+                        </svg>
+                        <span id="progress-percentage" class="text-sm font-black text-deep-navy">0%</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-slate-gray uppercase tracking-wider">Progresso Geral</span>
+                        <span id="progress-fraction" class="text-sm font-bold text-on-surface">0 de 3 Etapas</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <section class="lg:col-span-8 bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-6 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-surface-variant pb-4">
+                        <h2 class="text-lg font-bold text-deep-navy">Seu Cronograma de Entrada</h2>
+                        <span class="text-xs text-slate-gray">Sincronizado com o RH em tempo real</span>
+                    </div>
+                    
+                    <div id="roadmap-timeline" class="relative flex flex-col gap-8 py-2">
+                        <div class="text-center py-10 text-slate-gray flex flex-col items-center justify-center gap-3">
+                            <span class="material-symbols-outlined animate-spin text-primary text-3xl">progress_activity</span>
+                            <p class="text-sm">Buscando informações do seu onboarding...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="lg:col-span-4 flex flex-col gap-6">
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center gap-2 border-b border-surface-variant pb-4">
+                            <span class="material-symbols-outlined text-primary">diversity_3</span>
+                            <h2 class="text-md font-bold text-deep-navy">Sua Rede de Apoio</h2>
+                        </div>
+                        
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-4 p-3 rounded-xl bg-surface-container-low border border-outline-variant/40">
+                                <div class="w-12 h-12 rounded-full bg-deep-navy text-white flex items-center justify-center font-bold text-sm">CM</div>
+                                <div class="flex-grow">
+                                    <h4 class="text-sm font-bold text-deep-navy">Carlos Mendes</h4>
+                                    <p class="text-xs text-slate-gray">Gestor Direto</p>
+                                </div>
+                                <a href="https://teams.microsoft.com" target="_blank" class="p-2 hover:bg-primary/10 text-primary rounded-full transition-all">
+                                    <span class="material-symbols-outlined text-md">chat</span>
+                                </a>
+                            </div>
+
+                            <div class="flex items-center gap-4 p-3 rounded-xl bg-surface-container-low border border-outline-variant/40">
+                                <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">MS</div>
+                                <div class="flex-grow">
+                                    <h4 class="text-sm font-bold text-deep-navy">Marina Silva</h4>
+                                    <p class="text-xs text-slate-gray">Onboarding Buddy</p>
+                                </div>
+                                <a href="https://teams.microsoft.com" target="_blank" class="p-2 hover:bg-primary/10 text-primary rounded-full transition-all">
+                                    <span class="material-symbols-outlined text-md">chat</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-deep-navy text-white rounded-xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden">
+                        <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-container rounded-full opacity-20 blur-2xl"></div>
+                        <h3 class="text-lg font-bold">Dúvidas sobre o processo?</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">Criamos um manual prático contendo tudo sobre o ecossistema SBK, benefícios, ponto eletrônico e cultura corporativa.</p>
+                        <button onclick="alert('Abrindo Manual de Integração SBK.pdf...')" class="w-full bg-lime-accent text-deep-navy font-bold text-xs py-3 px-4 rounded-lg hover:bg-white transition-all cursor-pointer shadow-sm text-center">
+                            Acessar Manual de Cultura
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Em produção, este ID viria da sessão logada no backend (ex: req.session)
+            // Vamos simular consumindo o primeiro registro da nossa API Node.js
+            try {
+                const response = await fetch('/api/onboarding');
+                const processos = await response.json();
+
+                if (!processos || processos.length === 0) {
+                    renderizarTelaVazia();
+                    return;
+                }
+
+                // Capturamos o processo ativo (ex: o primeiro retornado)
+                const meuProcesso = processos[0];
+                const colaborador = meuProcesso.Colaborador;
+
+                // 1. Atualizar informações básicas do usuário logado
+                document.getElementById('user-fullname').innerText = colaborador.nome;
+                document.getElementById('welcome-name').innerText = colaborador.nome.split(' ')[0];
+                document.getElementById('user-badge-mobile').innerText = colaborador.nome.split(' ')[0];
+                
+                // Iniciais do Avatar
+                const iniciais = colaborador.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+                document.getElementById('user-initials').innerText = iniciais;
+
+                // 2. Processar a máquina de estados para montar o progresso dinâmico
+                const estadoAtual = meuProcesso.estadoEtapaAtual;
+                processarProgressoEMapas(estadoAtual);
+
+            } catch (error) {
+                console.error("Erro na comunicação com o backend:", error);
+                document.getElementById('roadmap-timeline').innerHTML = `
+                    <div class="text-center p-6 text-error">
+                        <span class="material-symbols-outlined text-3xl">cloud_off</span>
+                        <p class="text-sm font-bold mt-2">Falha na conexão com o servidor do StepUp.</p>
+                    </div>
+                `;
+            }
+        });
+
+        function processarProgressoEMapas(estado) {
+            const containerTimeline = document.getElementById('roadmap-timeline');
+            containerTimeline.innerHTML = ''; // Limpa loader
+
+            // Definição das 3 fases principais da regra de negócio (JPA Enums originais)
+            const fases = [
+                { id: 'DOCUMENTACAO_RH', titulo: 'Documentação RH', desc: 'Envio de documentações obrigatórias, contratos e dados bancários.' },
+                { id: 'PREPARACAO_TI', titulo: 'Preparação TI', desc: 'Montagem do setup de hardware, liberação de e-mail e credenciais de rede.' },
+                { id: 'ALINHAMENTO_GESTOR', titulo: 'Alinhamento Gestor', desc: 'Atas de boas-vindas, entrega de metas do trimestre e acoplamento ao time.' }
+            ];
+
+            // Identificação do status do processo
+            const isBloqueado = (estado === 'BLOQUEADO');
+            
+            // Recupera o último estado válido se estiver bloqueado (por padrão assume RH no fluxo inicial)
+            let estadoEfetivo = isBloqueado ? 'DOCUMENTACAO_RH' : estado; 
+            if (estado === 'EM_ANDAMENTO' || estado === 'CONCLUIDO') estadoEfetivo = 'ALINHAMENTO_GESTOR';
+
+            // Localiza o índice atual na esteira de produção
+            let indiceFaseAtual = fases.findIndex(f => f.id === estadoEfetivo);
+            if (indiceFaseAtual === -1) indiceFaseAtual = 0;
+
+            // Se o fluxo global marcou CONCLUIDO nas tabelas do back, tudo vira 100%
+            const onboardingTotalmenteConcluido = (estado === 'CONCLUIDO');
+
+            // 3. Cálculo Dinâmico da Rosca de Progresso (Métricas Reais)
+            let concluidas = onboardingTotalmenteConcluido ? 3 : indiceFaseAtual;
+            let percentual = Math.round((concluidas / 3) * 100);
+            
+            // Força um ganho visual de 10% para o colaborador não ver 0% na primeira fase
+            if (percentual === 0) percentual = 10; 
+
+            document.getElementById('progress-percentage').innerText = `${percentual}%`;
+            document.getElementById('progress-fraction').innerText = `${concluidas} de 3 Fases`;
+            
+            // Renderização do círculo SVG (Tailwind stroke-dasharray)
+            const strokeDash = `${percentual}, 100`;
+            document.getElementById('progress-circle').setAttribute('stroke-dasharray', strokeDash);
+
+            // 4. Tratamento visual do aviso de BLOQUEADO
+            if (isBloqueado) {
+                document.getElementById('block-banner').classList.remove('hidden');
+                document.getElementById('block-banner').classList.add('flex');
+                document.getElementById('current-phase-text').innerText = "Bloqueado pelo RH";
+                document.getElementById('current-phase-text').className = "font-bold text-error";
+            } else {
+                document.getElementById('current-phase-text').innerText = onboardingTotalmenteConcluido ? "Concluído!" : fases[indiceFaseAtual].titulo;
+            }
+
+            // 5. Geração Dinâmica da Linha de Conexão do Timeline
+            const linhaConectora = document.createElement('div');
+            linhaConectora.className = "absolute left-[1.1rem] top-4 bottom-8 w-0.5 bg-slate-200 z-0";
+            containerTimeline.appendChild(linhaConectora);
+
+            // 6. Loop de construção dos Cards do Roadmap (A "Mágica" do controle de travas)
+            fases.forEach((fase, index) => {
+                let statusFase = 'bloqueado'; // bloqueado (com cadeado)
+                
+                if (onboardingTotalmenteConcluido || index < indiceFaseAtual) {
+                    statusFase = 'concluido';
+                } else if (index === indiceFaseAtual && !onboardingTotalmenteConcluido) {
+                    statusFase = isBloqueado ? 'bloqueado-alerta' : 'atual';
+                }
+
+                // Elemento html da fase
+                const divFase = document.createElement('div');
+                divFase.className = `relative z-10 flex gap-4 transition-all duration-300 ${statusFase === 'bloqueado' ? 'opacity-40' : ''}`;
+
+                // Configuração visual de Ícones e Cores por Estado
+                let iconeHtml = '';
+                let badgeHtml = '';
+
+                if (statusFase === 'concluido') {
+                    iconeHtml = `<div class="w-9 h-9 rounded-full bg-success text-white flex items-center justify-center shrink-0 border-4 border-white shadow-sm"><span class="material-symbols-outlined text-md font-bold">check</span></div>`;
+                    badgeHtml = `<span class="bg-success/10 text-success px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">Finalizado</span>`;
+                } else if (statusFase === 'atual') {
+                    iconeHtml = `<div class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shrink-0 border-4 border-white shadow-sm ring-4 ring-primary/10"><span class="material-symbols-outlined text-md animate-spin-slow">sync</span></div>`;
+                    badgeHtml = `<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">Em Andamento</span>`;
+                } else if (statusFase === 'bloqueado-alerta') {
+                    iconeHtml = `<div class="w-9 h-9 rounded-full bg-error text-white flex items-center justify-center shrink-0 border-4 border-white shadow-sm ring-4 ring-error/20"><span class="material-symbols-outlined text-md">warning</span></div>`;
+                    badgeHtml = `<span class="bg-error/10 text-error px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">Pausado</span>`;
+                } else {
+                    iconeHtml = `<div class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center shrink-0 border-4 border-white shadow-sm"><span class="material-symbols-outlined text-md">lock</span></div>`;
+                    badgeHtml = `<span class="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">Aguardando</span>`;
+                }
+
+                // Injeção da estrutura interna do card com os checkboxes simulados apenas na fase ativa
+                let areaSubtarefasHtml = '';
+                if (statusFase === 'atual' || statusFase === 'bloqueado-alerta') {
+                    areaSubtarefasHtml = `
+                        <div class="bg-surface-container-low rounded-xl border border-outline-variant/60 p-4 mt-3 flex flex-col gap-3 shadow-inner">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input class="mt-0.5 rounded border-outline-variant text-primary focus:ring-primary/20 w-4 h-4 cursor-pointer" type="checkbox" ${isBloqueado ? 'disabled' : ''}>
+                                <span class="text-xs text-on-surface group-hover:text-primary transition-colors">Confirmar recebimento das diretrizes iniciais</span>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input class="mt-0.5 rounded border-outline-variant text-primary focus:ring-primary/20 w-4 h-4 cursor-pointer" type="checkbox" ${isBloqueado ? 'disabled' : ''}>
+                                <span class="text-xs text-on-surface group-hover:text-primary transition-colors">Validar dados cadastrais junto ao tutor da área</span>
+                            </label>
+                        </div>
+                    `;
+                }
+
+                divFase.innerHTML = `
+                    ${iconeHtml}
+                    <div class="flex flex-col w-full">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold ${statusFase === 'atual' ? 'text-primary' : 'text-deep-navy'}">Fase ${index + 1}</h3>
+                            ${badgeHtml}
+                        </div>
+                        <p class="text-sm font-bold text-deep-navy mt-0.5">${fase.titulo}</p>
+                        <p class="text-xs text-slate-gray mt-1">${fase.desc}</p>
+                        ${areaSubtarefasHtml}
+                    </div>
+                `;
+
+                containerTimeline.appendChild(divFase);
+            });
+        }
+
+        function renderizarTelaVazia() {
+            document.getElementById('roadmap-timeline').innerHTML = `
+                <div class="text-center py-10 text-slate-gray">
+                    <span class="material-symbols-outlined text-3xl">badge</span>
+                    <p class="text-sm mt-2">Nenhum registro de onboarding localizado para a sua conta.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
