@@ -1,14 +1,11 @@
-// services/onboardingService.js
-// ATENDE: "Tornar explícito quem deve o quê" e "Notificar os responsáveis"
-
 const OnboardingProcesso = require('../models/OnboardingProcesso');
-const HistoricoOnboarding = require('../models/HistoricoOnboarding'); // Tabela de logs para auditoria
+const HistoricoOnboarding = require('../models/HistoricoOnboarding');
 const { enviarMensagemTeams, enviarEmailSimulado } = require('./notificadorService');
 
 class OnboardingService {
     
     async avançarEtapa(processoId, usuarioQueAlterou) {
-        const processo = await OnboardingProcesso.findByPk(processoId);
+        const processo = await OnboardingProcesso.findByPk(processoId, { include: 'Colaborador' });
         if (!processo) throw new Error("Processo de onboarding não encontrado.");
         
         const etapaAnterior = processo.etapa_atual;
@@ -19,11 +16,11 @@ class OnboardingService {
         if (etapaAnterior === 'DOCUMENTACAO_RH') {
             proximaEtapa = 'ACESSOS_TI';
             proximoResponsavel = 'TI';
-            diasDePrazo = 2; // TI tem 48h para abrir acessos
+            diasDePrazo = 2;
         } else if (etapaAnterior === 'ACESSOS_TI') {
             proximaEtapa = 'APRESENTACAO_GESTOR';
             proximoResponsavel = 'GESTOR';
-            diasDePrazo = 3; // Gestor tem 3 dias para apresentar o time
+            diasDePrazo = 3;
         } else if (etapaAnterior === 'APRESENTACAO_GESTOR') {
             proximaEtapa = 'CONCLUIDO';
             proximoResponsavel = 'NENHUM';
@@ -33,14 +30,12 @@ class OnboardingService {
         const novoPrazo = new Date();
         novoPrazo.setDate(novoPrazo.getDate() + diasDePrazo);
 
-   
         processo.etapa_atual = proximaEtapa;
         processo.responsavel_atual = proximoResponsavel;
         processo.status_etapa = proximaEtapa === 'CONCLUIDO' ? 'CONCLUIDO' : 'PENDENTE';
         processo.data_entrada_etapa = new Date();
         processo.prazo_limite_etapa = novoPrazo;
         await processo.save();
-
 
         await HistoricoOnboarding.create({
             processo_id: processo.id,
@@ -49,10 +44,18 @@ class OnboardingService {
             alterado_por: usuarioQueAlterou,
             data_mudanca: new Date()
         });
-l
-        if (proximaEtapa !== 'CONCLUIDO') {
-            const mensagem = `📢 Alerta StepUp: O processo de onboarding do colaborador entrou na etapa [${proximaEtapa}]. Responsável: @${proximoResponsavel}. Prazo até: ${novoPrazo.toLocaleDateString()}`;
 
+        if (etapaAnterior === 'DOCUMENTACAO_RH') {
+            const emailCandidato = processo.Colaborador ? processo.Colaborador.email : 'candidato@email.com';
+            
+            const msgTI = `📢 Alerta StepUp: O RH concluiu as tarefas. A etapa atual agora é [ACESSOS_TI]. Responsável: @TI. Prazo: ${novoPrazo.toLocaleDateString()}`;
+            await enviarMensagemTeams('TI', msgTI);
+            await enviarEmailSimulado('TI', msgTI);
+
+            const msgCandidato = `🎉 Olá! Sua documentação foi aprovada pelo RH. O setor de TI já foi notificado e está preparando seus acessos e ferramentas!`;
+            await enviarEmailSimulado(emailCandidato, msgCandidato);
+        } else if (proximaEtapa !== 'CONCLUIDO') {
+            const mensagem = `📢 Alerta StepUp: O processo de onboarding entrou na etapa [${proximaEtapa}]. Responsável: @${proximoResponsavel}. Prazo até: ${novoPrazo.toLocaleDateString()}`;
             await enviarMensagemTeams(proximoResponsavel, mensagem);
             await enviarEmailSimulado(proximoResponsavel, mensagem);
         }
@@ -62,7 +65,6 @@ l
 
     async verificarProcessosAtrasados() {
         const agora = new Date();
-        // Busca processos que não terminaram e que estouraram o prazo_limite_etapa
         const processosAtrasados = await OnboardingProcesso.findAll({
             where: {
                 etapa_atual: { [Op.ne]: 'CONCLUIDO' },

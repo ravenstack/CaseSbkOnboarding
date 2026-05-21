@@ -14,10 +14,10 @@ exports.listarProcessos = async (req, res) => {
 exports.atualizarStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { novoStatus, responsavel, observacoes } = req.body;
+        const { responsavel } = req.body;
         
-        await onboardingService.atualizarStatus(id, novoStatus, responsavel, observacoes);
-        res.json({ mensagem: "Status atualizado com sucesso!" });
+        const processoAtualizado = await onboardingService.avançarEtapa(id, responsavel);
+        res.json({ mensagem: "Status atualizado e responsáveis notificados com sucesso!", processo: processoAtualizado });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

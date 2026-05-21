@@ -1,10 +1,8 @@
-// routes/onboardingRoutes.js
 const express = require('express');
 const router = express.Router();
 const OnboardingProcesso = require('../models/OnboardingProcesso');
 const Colaborador = require('../models/Colaborador');
 
-// Endpoint focado em trazer a visão unificada para o colaborador logado
 router.get('/colaborador/:colaboradorId', async (req, res) => {
     try {
         const processo = await OnboardingProcesso.findOne({
@@ -20,7 +18,7 @@ router.get('/colaborador/:colaboradorId', async (req, res) => {
             id: processo.id,
             colaborador_nome: processo.Colaborador.nome,
             etapa_atual: processo.etapa_atual,
-            responsavel_atual: RichmondProcesso.responsavel_atual,
+            responsavel_atual: processo.responsavel_atual,
             status_etapa: processo.status_etapa,
             prazo_limite_etapa: processo.prazo_limite_etapa
         });
