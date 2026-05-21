@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="light" lang="pt-BR">
+<html class="light" lang="pt-PT">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>StepUp - Gestão de Onboarding</title>
+    <title>StepUp - Gestão de Onboarding (PRO)</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
 <body class="bg-background text-on-background font-sans min-h-screen flex">
 
 <nav class="hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-slate-200 bg-deep-navy w-64 z-50">
-    <div class="flex items-center px-6 py-6 border-b border-surface-variant/20">
+    <div class="flex items-center px-6 py-6 border-b border-white/10">
         <span class="font-display-lg text-2xl text-lime-accent font-black tracking-wider flex items-center gap-2">
             <span class="material-symbols-outlined">rocket_launch</span> StepUp
         </span>
@@ -50,13 +50,13 @@
             Fila de Processos
         </a>
     </div>
-    <div class="flex flex-col gap-2 px-4 py-4 border-t border-surface-variant/20">
+    <div class="flex flex-col gap-2 px-4 py-4 border-t border-white/10">
         <div class="px-4 py-2 text-xs font-bold text-slate-gray uppercase tracking-wider">Sessão Atual</div>
         <div class="flex items-center gap-2 px-4 py-2 text-white text-xs bg-white/5 rounded border border-white/10">
             <span class="material-symbols-outlined text-sm text-lime-accent" id="nav-role-icon">badge</span>
             <span id="nav-role-name" class="font-mono font-bold uppercase">Buscando...</span>
         </div>
-        <a class="flex items-center gap-3 px-4 py-3 text-surface-variant text-sm font-semibold hover:bg-white/10 transition-colors duration-200 mt-2 rounded-lg" href="login.html">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-gray hover:text-white text-sm font-semibold transition-colors duration-200 mt-2 rounded-lg" href="login.html">
             <span class="material-symbols-outlined text-xl">logout</span>
             Sair
         </a>
@@ -64,186 +64,172 @@
 </nav>
 
 <main class="flex-1 md:ml-64 flex flex-col min-h-screen bg-surface">
-    <header class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full sticky top-0 z-40 bg-surface-container-lowest border-b border-slate-200">
+    <header class="flex justify-between items-center px-6 md:px-10 h-16 w-full sticky top-0 z-40 bg-surface-container-lowest border-b border-slate-200">
         <div class="flex items-center gap-4">
-            <span class="font-semibold text-sm uppercase tracking-wider text-primary">Painel de Liderança</span>
+            <span class="font-semibold text-sm uppercase tracking-wider text-primary">Painel Operacional</span>
             <span class="material-symbols-outlined text-sm text-slate-gray">chevron_right</span>
-            <span class="text-sm font-semibold text-slate-gray" id="header-context-txt">Fila Operacional</span>
+            <span class="text-sm font-semibold text-slate-gray">Gestão de Filas</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200" id="badge-perfil-contexto">Perfil</span>
         </div>
     </header>
 
-    <div class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full flex flex-col gap-6">
+    <div class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col gap-6">
         
-        <div class="bg-blue-50 border-l-4 border-primary-container p-4 rounded-r-xl shadow-sm flex gap-3 items-start" id="banner-informativo-role">
+        <div class="bg-blue-50 border-l-4 border-primary-container p-4 rounded-r-xl shadow-sm flex gap-3 items-start">
             <span class="material-symbols-outlined text-primary-container">info</span>
             <div>
-                <h4 class="font-bold text-sm text-deep-navy">Visão Customizada Ativada</h4>
-                <p class="text-xs text-slate-gray mt-0.5 leading-relaxed" id="role-welcome-desc">Carregando permissões operacionais do usuário corporativo...</p>
+                <h4 class="font-bold text-sm text-deep-navy">Visão de Departamento Ativada</h4>
+                <p class="text-xs text-slate-gray mt-0.5 leading-relaxed" id="role-welcome-desc">A carregar as permissões do teu departamento...</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-6">
-            <section class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-deep-navy">Lista Global de Novos Colaboradores</h2>
-                        <p class="text-xs text-slate-gray mt-0.5">Acompanhe os prazos e execute as ações pendentes do seu departamento para mitigar os gargalos.</p>
-                    </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-lg font-black text-deep-navy">Fila de Novos Colaboradores</h2>
+                    <p class="text-xs text-slate-gray mt-0.5">Valida as exigências da tua área. Ao aprovar, o processo passa automaticamente para o departamento seguinte.</p>
                 </div>
+            </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low text-slate-gray text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 rounded-tl-lg">Colaborador</th>
-                                <th class="p-4">Etapa Atual</th>
-                                <th class="p-4">Setor Responsável</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4">Prazo Limite</th>
-                                <th class="p-4 text-center rounded-tr-lg">Ação Reativa</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-processos-body" class="text-sm divide-y divide-slate-100">
-                            <tr>
-                                <td colspan="6" class="p-8 text-center text-slate-gray">Buscando registros no banco de dados persistente...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-slate-gray text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-4 rounded-tl-lg">Colaborador</th>
+                            <th class="p-4">Etapa Atual</th>
+                            <th class="p-4">Setor Responsável</th>
+                            <th class="p-4">Estado</th>
+                            <th class="p-4">Prazo Limite</th>
+                            <th class="p-4 text-center rounded-tr-lg">Ação Reativa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-processos-body" class="text-sm divide-y divide-slate-100">
+                        <tr><td colspan="6" class="p-8 text-center text-slate-gray">A carregar registos da base de dados...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </main>
 
 <script>
-    // 1. Capturar a Persona Logada enviada via Query String (?role=rh, ?role=ti, ?role=gestor, ?role=admin)
+    // 1. Identificar a equipa que fez login
     const urlParams = new URLSearchParams(window.location.search);
-    const USER_ROLE = urlParams.get('role') || 'admin'; // Fallback para admin/visão geral completa
+    const USER_ROLE = urlParams.get('role') || 'admin'; 
 
-    // Configurações visuais das personas
     const roleConfigMapeamento = {
-        'rh': { nome: "Recursos Humanos", icon: "badge", desc: "Você está visualizando apenas pendências contratuais. Aprove a etapa assim que a documentação for digitalizada." },
-        'ti': { nome: "Equipe de TI", icon: "desktop_mac", desc: "Visão focada no provisionamento de hardware e acessos. Valide o setup para liberar o roteiro do gestor." },
-        'gestor': { nome: "Gestor de Área", icon: "supervisor_account", desc: "Acompanhe sua fila de liderados. Execute o check-in e a apresentação para concluir o fluxo de onboarding." },
-        'admin': { nome: "Administrador Geral", icon: "shield_person", desc: "Visão Master do ecossistema StepUp. Monitoramento global de todos os setores e prazos do banco de dados." }
+        'rh': { nome: "Recursos Humanos", icon: "badge", desc: "Fila de Contratos. Analisa e aprova a documentação para avançar o processo para a TI." },
+        'ti': { nome: "Equipa de TI", icon: "desktop_mac", desc: "Fila de Infraestrutura. Prepara os acessos e o hardware antes de notificar o Gestor." },
+        'gestor': { nome: "Gestor de Área", icon: "supervisor_account", desc: "Acompanha e valida a integração e os objetivos da tua equipa para fechar o processo." },
+        'admin': { nome: "Administrador Geral", icon: "shield_person", desc: "Visão Master. Acesso total a todas as filas e métricas de desempenho." }
     };
 
-    // 2. Inicializar a Interface de Acordo com o Perfil Logado
     function inicializarContextoPerfil() {
         const config = roleConfigMapeamento[USER_ROLE] || roleConfigMapeamento['admin'];
         
         document.getElementById('nav-role-name').innerText = USER_ROLE;
         document.getElementById('nav-role-icon').innerText = config.icon;
-        document.getElementById('badge-perfil-contexto').innerText = `Perfil: ${config.nome}`;
+        document.getElementById('badge-perfil-contexto').innerText = `Equipa: ${config.nome}`;
         document.getElementById('role-welcome-desc').innerText = config.desc;
         
-        carregarProcessosGerenciais();
+        carregarDadosDeProducao();
     }
 
-    // 3. Buscar os Dados Reais no Servidor Node.js
-    async function carregarProcessosGerenciais() {
+    // 2. Lógica PRO (Fetch Real à Base de Dados)
+    async function carregarDadosDeProducao() {
+        const tbody = document.getElementById('tabela-processos-body');
+        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-gray"><span class="material-symbols-outlined animate-spin">refresh</span> A sincronizar com o servidor...</td></tr>';
+
         try {
-            // Em produção, essa rota trará o array de todos os colaboradores e seus onboarding relacionados
-            const response = await fetch('/api/onboarding/processos'); 
-            let processos = [];
+            const response = await fetch('/api/onboarding/processos');
+            if (!response.ok) throw new Error("Erro na API");
             
-            if (response.ok) {
-                processos = await response.json();
-            } else {
-                // Mock estratégico de contingência para apresentação se a API estiver em deploy
-                processos = [
-                    { id: 1, nome_colaborador: "Pedro Alencar", etapa_atual: "DOCUMENTACAO_RH", responsavel_atual: "RH", status_etapa: "PENDENTE", prazo_limite_etapa: new Date(Date.now() + 86400000) },
-                    { id: 2, nome_colaborador: "Mariana Silva", etapa_atual: "ACESSOS_TI", responsavel_atual: "TI", status_etapa: "ATRASADO", prazo_limite_etapa: new Date(Date.now() - 3600000) },
-                    { id: 3, nome_colaborador: "Bruno Souza", etapa_atual: "APRESENTACAO_GESTOR", responsavel_atual: "GESTOR", status_etapa: "EM_ANDAMENTO", prazo_limite_etapa: new Date(Date.now() + 172800000) }
-                ];
-            }
+            const processosDB = await response.json();
 
-            const tbody = document.getElementById('tabela-processos-body');
-            tbody.innerHTML = '';
-
-            // 4. Aplicar o Filtro Reativo por Perfil (RH só mexe em RH, TI só mexe em TI, etc.)
+            // Filtragem inteligente: O RH só vê tarefas do RH. A TI só vê da TI.
             const processosFiltrados = USER_ROLE === 'admin' 
-                ? processos 
-                : processos.filter(p => p.responsavel_atual.toLowerCase() === USER_ROLE);
+                ? processosDB 
+                : processosDB.filter(p => p.responsavel_atual.toLowerCase() === USER_ROLE);
 
             if (processosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-gray font-medium">Nenhum onboarding pendente na fila do setor [${USER_ROLE.toUpperCase()}] no momento. Tudo em dia! ✅</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-gray font-medium">Não há processos pendentes para a equipa de [${USER_ROLE.toUpperCase()}]. Excelente trabalho! ✅</td></tr>`;
                 return;
             }
 
-            processosFiltrados.forEach(p => {
-                // Mapear Cores do Status
-                let statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800">⏳ EM ANDAMENTO</span>`;
-                if (p.status_etapa === 'ATRASADO') {
-                    statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-rose-100 text-error animate-pulse">🚨 ATRASADO</span>`;
-                } else if (p.status_etapa === 'CONCLUIDO') {
-                    statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-success">✅ CONCLUÍDO</span>`;
-                }
-
-                // Definir os títulos amigáveis das sub-tarefas de cada etapa por setor para expor na tabela
-                let tarefasDaEtapaTxt = "";
-                if (p.etapa_atual === "DOCUMENTACAO_RH") tarefasDaEtapaTxt = "Aprovar Contratos e RG";
-                else if (p.etapa_atual === "ACESSOS_TI") tarefasDaEtapaTxt = "Liberar Credenciais e Notebook";
-                else if (p.etapa_atual === "APRESENTACAO_GESTOR") tarefasDaEtapaTxt = "Realizar Reunião de Equipe";
-
-                // Botão de Ação Condicional: Só fica ativo se o processo for da alçada de quem está logado
-                const pertenceAoSetorLogado = USER_ROLE === 'admin' || p.responsavel_atual.toLowerCase() === USER_ROLE;
-                
-                let botaoAcao = `
-                    <button onclick="validarAvancoEtapaSimulado(${p.id}, '${p.etapa_atual}')" 
-                        class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm hover:bg-primary-container transition-all flex items-center gap-1 mx-auto active:scale-95 cursor-pointer">
-                        <span class="material-symbols-outlined text-sm">assignment_turned_in</span>
-                        Validar: ${tarefasDaEtapaTxt}
-                    </button>
-                `;
-
-                if (!pertenceAoSetorLogado) {
-                    botaoAcao = `<span class="text-xs text-slate-gray font-medium italic block text-center">Aguardando setor anterior</span>`;
-                }
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="p-4 font-bold text-deep-navy">${p.nome_colaborador}</td>
-                        <td class="p-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200/60 text-slate-700">${p.etapa_atual}</span></td>
-                        <td class="p-4 font-semibold text-primary">${p.responsavel_atual}</td>
-                        <td class="p-4">${statusBadge}</td>
-                        <td class="p-4 text-xs text-slate-gray font-medium">${new Date(p.prazo_limite_etapa).toLocaleDateString('pt-BR')}</td>
-                        <td class="p-4">${botaoAcao}</td>
-                    </tr>
-                `;
-            });
+            tbody.innerHTML = ''; // Limpa a tabela para renderizar
+            processosFiltrados.forEach(p => renderizarLinhaTabela(p, tbody));
 
         } catch (error) {
-            console.error("Erro na carga gerencial:", error);
+            console.error("Erro em Produção:", error);
+            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-error font-medium">Erro ao comunicar com a base de dados. Verifica se o backend Node.js está a correr.</td></tr>`;
         }
     }
 
-    // 5. Motor de Transição de Estados Acionado via Clique do Gestor/RH/TI
-    async function validarAvancoEtapaSimulado(processoId, etapaAtual) {
-        if (!confirm(`Confirmar validação e conclusão da etapa [${etapaAtual}]? O processo avançará automaticamente para o próximo setor no banco de dados.`)) return;
+    function renderizarLinhaTabela(p, tbody) {
+        let statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800">⏳ EM ANDAMENTO</span>`;
+        if (p.status_etapa === 'ATRASADO') {
+            statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-rose-100 text-error animate-pulse">🚨 ATRASADO</span>`;
+        } else if (p.status_etapa === 'CONCLUIDO') {
+            statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-success">✅ CONCLUÍDO</span>`;
+        }
+
+        let tarefasDaEtapaTxt = "Validar Etapa";
+        if (p.etapa_atual === "DOCUMENTACAO_RH") tarefasDaEtapaTxt = "Aprovar Contrato/Doc";
+        else if (p.etapa_atual === "ACESSOS_TI") tarefasDaEtapaTxt = "Liberar Equipamento/Acessos";
+        else if (p.etapa_atual === "APRESENTACAO_GESTOR") tarefasDaEtapaTxt = "Validar Check-in e Metas";
+
+        const pertenceAoSetorLogado = USER_ROLE === 'admin' || p.responsavel_atual.toLowerCase() === USER_ROLE;
+        
+        let botaoAcao = `
+            <button onclick="avancarEtapaPRO(${p.id}, '${p.etapa_atual}')" 
+                class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm hover:bg-primary-container transition-all flex items-center gap-1 mx-auto active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                ${tarefasDaEtapaTxt}
+            </button>
+        `;
+
+        if (!pertenceAoSetorLogado) {
+            botaoAcao = `<span class="text-xs text-slate-gray font-medium italic block text-center">Aguardar equipa anterior</span>`;
+        }
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="p-4 font-bold text-deep-navy">${p.nome_colaborador || 'Colaborador API'}</td>
+                <td class="p-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200/60 text-slate-700">${p.etapa_atual.replace('_', ' ')}</span></td>
+                <td class="p-4 font-semibold text-primary">${p.responsavel_atual}</td>
+                <td class="p-4">${statusBadge}</td>
+                <td class="p-4 text-xs text-slate-gray font-medium">${p.prazo_limite_etapa ? new Date(p.prazo_limite_etapa).toLocaleDateString('pt-PT') : 'A definir'}</td>
+                <td class="p-4">${botaoAcao}</td>
+            </tr>
+        `;
+    }
+
+    // 3. Ação PRO: Validação e Transição Real via API
+    async function avancarEtapaPRO(processoId, etapaAtual) {
+        if (!confirm("Confirmas a conclusão das tarefas? O processo sairá da tua fila e passará para a próxima equipa.")) return;
 
         try {
-            // Requisição PATCH enviada para o backend Node/Express que aciona a máquina de estados
+            // Chamada oficial ao Backend (sem redirecionamentos indesejados)
             const response = await fetch(`/api/onboarding/avancar/${processoId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario: `Simulador_${USER_ROLE.toUpperCase()}` })
+                body: JSON.stringify({ usuario: USER_ROLE.toUpperCase() })
             });
 
             if (response.ok) {
-                alert("Sucesso! Etapa processada, histórico de auditoria gravado e próxima fila notificada automaticamente. 🎉");
-                carregarProcessosGerenciais();
+                alert("Sucesso! A tua validação foi registada na base de dados.");
+                // MAGIA ACONTECE AQUI: Atualiza a tabela na hora. 
+                // Como o filtro está ativo, o registo vai sumir da fila atual!
+                carregarDadosDeProducao(); 
             } else {
-                // Sucesso simulado para garantir o dinamismo visual no Pitch de 48h
-                alert(`[Simulação MVP] Sucesso! Você validou a etapa de ${USER_ROLE.toUpperCase()}. O processo de onboarding avançou e atualizou as regras de negócio de Pedro Alencar.`);
-                // Força alteração local fictícia apenas para visualização em tempo real na tela
-                window.location.href = `dashboard_colab.html`; // Redireciona para ver o reflexo imediato no colaborador
+                const erro = await response.json();
+                alert(`Erro ao validar: ${erro.message || 'Falha no servidor'}`);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Erro de Transição:", error);
+            alert("Erro crítico: Falha ao comunicar com o servidor Node.js.");
         }
     }
 

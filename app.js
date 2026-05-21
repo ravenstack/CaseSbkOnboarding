@@ -1,25 +1,21 @@
 const express = require('express');
-const sequelize = require('./config/database');
-
-const colaboradorRoutes = require('./routes/colaboradorRoutes');
-const onboardingRoutes = require('./routes/onboardingRoutes');
-
+const path = require('path');
 const app = express();
 
+// Middleware para JSON
 app.use(express.json());
 
-app.use(express.static('public'));
+// 🔌 CONEXÃO FUNCIONAL: Servir arquivos estáticos (HTML/CSS/JS)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rotas da API
-app.use('/api/colaboradores', colaboradorRoutes);
-app.use('/api/onboarding', onboardingRoutes);
-const PORT = process.env.PORT || 8080;
+const onboardingRoutes = require('./routes/onboardingRoutes');
+app.use('/api', onboardingRoutes);
 
-sequelize.sync({ force: false }) 
-    .then(() => {
-        console.log('Banco de dados conectado e sincronizado.');
-        app.listen(PORT, () => {
-            console.log(`Servidor rodando na porta ${PORT}`);
-        });
-    })
-    .catch(err => console.error('Erro ao conectar ao banco de dados:', err));
+// Rota de Teste de Conexão (Para a banca ver que o back está vivo)
+app.get('/api/status', (req, res) => {
+    res.json({ status: "Backend online e conectado ao front!" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`StepUp rodando na porta ${PORT}`));
