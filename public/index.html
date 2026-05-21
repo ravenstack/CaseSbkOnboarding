@@ -1,598 +1,1121 @@
 <!DOCTYPE html>
-<html class="light" lang="pt-BR">
+<html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>StepUp — Simulação de Fluxo MVP</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --navy: #0A1628;
-            --navy-mid: #132040;
-            --navy-border: rgba(255,255,255,0.08);
-            --accent: #3B82F6;
-            --accent-glow: rgba(59,130,246,0.15);
-            --success: #10B981;
-            --warning: #F59E0B;
-            --error: #EF4444;
-            --surface: #F8FAFC;
-            --card: #FFFFFF;
-            --text-primary: #0F172A;
-            --text-secondary: #64748B;
-            --border: #E2E8F0;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text-primary); }
-        .font-mono { font-family: 'DM Mono', monospace; }
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>StepUp — Simulação de Fluxo MVP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0A1628; --navy-border: rgba(255,255,255,0.07);
+  --accent: #3B82F6; --success: #10B981; --warning: #F59E0B; --error: #EF4444;
+  --surface: #F8FAFC; --card: #FFFFFF; --border: #E2E8F0;
+  --text-primary: #0F172A; --text-secondary: #64748B;
+}
+* { box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text-primary); margin: 0; }
+.font-mono { font-family: 'DM Mono', monospace !important; }
+.sidebar { background: var(--navy); width: 288px; flex-shrink: 0; }
+.devmode-banner {
+  background: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(251,191,36,0.07) 6px, rgba(251,191,36,0.07) 12px);
+  border-bottom: 1px solid rgba(251,191,36,0.2);
+}
+.role-btn { transition: all 0.15s ease; border: 1px solid transparent; }
+.role-btn.active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.35); color: #fff; }
+.role-btn:not(.active):hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
+@keyframes ping-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.4} }
+.ping-dot { animation: ping-pulse 1.4s ease-in-out infinite; }
+.ring-path { transition: stroke-dasharray 0.6s cubic-bezier(.4,0,.2,1); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.chip-amber { background:#FEF3C7; color:#92400E; }
+.chip-blue  { background:#DBEAFE; color:#1E40AF; }
+.chip-green { background:#D1FAE5; color:#065F46; }
+.chip-slate { background:#F1F5F9; color:#64748B; }
+.chip-red   { background:#FEE2E2; color:#991B1B; }
+.chip-purple{ background:#EDE9FE; color:#5B21B6; }
+.step-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.1); z-index:2; }
+.step-dot.active { background:#1D4ED8; color:#fff; box-shadow:0 0 0 3px rgba(59,130,246,0.2),0 1px 4px rgba(0,0,0,.1); }
+.step-dot.partial { background:#F59E0B; color:#fff; box-shadow:0 0 0 3px rgba(245,158,11,0.2),0 1px 4px rgba(0,0,0,.1); }
+.step-dot.done   { background:#10B981; color:#fff; }
+.step-dot.locked { background:#E2E8F0; color:#94A3B8; }
+.step-line { position:absolute; left:16px; top:32px; bottom:-28px; width:1px; background:linear-gradient(to bottom, #CBD5E1, transparent); }
+table { border-collapse:collapse; width:100%; }
+th { background:#F8FAFC; color:#64748B; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; border-bottom:1px solid var(--border); text-align:left; }
+td { padding:13px 14px; border-bottom:1px solid #F1F5F9; font-size:13px; vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:#FAFBFF; }
+.btn-primary { background:#1D4ED8; color:#fff; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; cursor:pointer; transition:all .15s; border:none; font-family:inherit; }
+.btn-primary:hover { background:#1E40AF; transform:translateY(-1px); box-shadow:0 4px 12px rgba(29,78,216,.25); }
+.btn-primary:active { transform:translateY(0); }
+.btn-sm { background:#F1F5F9; color:#374151; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; cursor:pointer; transition:all .15s; border:1px solid #E2E8F0; font-family:inherit; }
+.btn-sm:hover { background:#E2E8F0; }
+.btn-danger { background:#FEE2E2; color:#991B1B; border-color:#FECACA; }
+.btn-danger:hover { background:#FECACA; }
+.breadcrumb-tag { background:#EFF6FF; color:#1D4ED8; padding:3px 9px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+.alert-info    { background:#EFF6FF; border-left:3px solid #3B82F6; }
+.alert-warn    { background:#FFFBEB; border-left:3px solid #F59E0B; }
+.alert-success { background:#ECFDF5; border-left:3px solid #10B981; }
+.worker-card { border:1px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer; transition:all .15s; background:#fff; }
+.worker-card:hover { border-color:#93C5FD; background:#F8FAFF; }
+.worker-card.selected { border-color:#3B82F6; background:#EFF6FF; }
+input[type="checkbox"] { accent-color: #3B82F6; }
+@keyframes badge-pop { 0%{transform:scale(0)} 60%{transform:scale(1.3)} 100%{transform:scale(1)} }
+.badge-pop { animation: badge-pop .3s ease forwards; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal { background:#fff; border-radius:16px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.15); }
 
-        /* Sidebar */
-        .sidebar { background: var(--navy); width: 280px; }
+.notif-btn { position:relative; width:36px; height:36px; border-radius:9px; border:1px solid var(--border); background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; flex-shrink:0; }
+.notif-btn:hover { background:#F8FAFC; border-color:#CBD5E1; }
+.notif-badge { position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; border-radius:9px; background:#EF4444; color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 3px; border:2px solid #fff; animation: badge-pop .3s ease forwards; }
+@keyframes bell-ring { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-12deg)} 40%{transform:rotate(12deg)} 60%{transform:rotate(-8deg)} 80%{transform:rotate(8deg)} }
+.bell-ring { animation: bell-ring .5s ease; }
 
-        /* Devtools badge no topo da sidebar */
-        .devmode-banner {
-            background: repeating-linear-gradient(
-                -45deg,
-                transparent,
-                transparent 6px,
-                rgba(251,191,36,0.08) 6px,
-                rgba(251,191,36,0.08) 12px
-            );
-            border-bottom: 1px solid rgba(251,191,36,0.25);
-        }
+.notif-dropdown { position:absolute; top:calc(100% + 8px); right:0; width:340px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.12); z-index:300; overflow:hidden; }
+@keyframes dropdown-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.notif-dropdown { animation: dropdown-in .18s ease; }
+.notif-item { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-bottom:1px solid #F1F5F9; transition:background .12s; cursor:default; }
+.notif-item:last-child { border-bottom:none; }
+.notif-item:hover { background:#F8FAFC; }
+.notif-item.unread { background:#FAFBFF; }
+.notif-item.unread::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:60%; background:#3B82F6; border-radius:0 2px 2px 0; }
+.notif-item { position:relative; }
+.notif-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.notif-time { font-size:10px; color:#94A3B8; font-family:'DM Mono',monospace; }
 
-        /* Role buttons */
-        .role-btn { transition: all 0.15s ease; }
-        .role-btn.active { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.45); color: #fff; }
-        .role-btn:not(.active):hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); }
-
-        /* Ping dot */
-        @keyframes ping-slow {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-        }
-        .ping-dot { animation: ping-slow 1.5s ease-in-out infinite; }
-
-        /* Progress ring */
-        .ring-path { transition: stroke-dasharray 0.6s cubic-bezier(0.4,0,0.2,1); }
-
-        /* Cards */
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-        .card-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-
-        /* Status chips */
-        .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
-        .chip-amber { background: #FEF3C7; color: #92400E; }
-        .chip-blue  { background: #DBEAFE; color: #1E40AF; }
-        .chip-green { background: #D1FAE5; color: #065F46; }
-        .chip-slate { background: #F1F5F9; color: #64748B; }
-
-        /* Step indicators */
-        .step-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-        .step-icon.active  { background: #1D4ED8; color: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.2), 0 1px 4px rgba(0,0,0,0.12); }
-        .step-icon.done    { background: var(--success); color: #fff; }
-        .step-icon.locked  { background: #E2E8F0; color: #94A3B8; }
-
-        /* Table */
-        table { border-collapse: collapse; width: 100%; }
-        th { background: #F8FAFC; color: var(--text-secondary); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-        td { padding: 14px 16px; border-bottom: 1px solid #F1F5F9; font-size: 13px; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tbody tr:hover td { background: #FAFBFF; }
-
-        /* Buttons */
-        .btn-primary { background: #1D4ED8; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s; border: none; }
-        .btn-primary:hover { background: #1E40AF; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.3); }
-        .btn-primary:active { transform: translateY(0); }
-
-        /* Header breadcrumb */
-        .breadcrumb-tag { background: #EFF6FF; color: #1D4ED8; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-
-        /* Alert strip */
-        .alert-info  { background: #EFF6FF; border-left: 3px solid #3B82F6; color: #1E3A5F; }
-        .alert-warn  { background: #FFFBEB; border-left: 3px solid #F59E0B; color: #78350F; }
-        .alert-success { background: #ECFDF5; border-left: 3px solid #10B981; color: #064E3B; }
-
-        /* Separator */
-        .phase-connector { position: absolute; left: 18px; top: 38px; width: 1px; height: calc(100% + 24px); background: linear-gradient(to bottom, #CBD5E1, transparent); z-index: 0; }
-    </style>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['DM Sans', 'sans-serif'], mono: ['DM Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
+/* Popup do responsável */
+.resp-popup {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  padding: 14px 18px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+  pointer-events: none;
+  animation: dropdown-in 0.15s ease;
+}
+.resp-popup::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-left: 1px solid #E2E8F0;
+  border-top: 1px solid #E2E8F0;
+  transform: rotate(45deg);
+}
+.resp-link {
+  color: #3B82F6;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+}
+</style>
 </head>
 <body class="flex min-h-screen">
 
-<!-- ═══════════════════════════════════════════════════════ SIDEBAR ═══ -->
-<nav class="sidebar hidden md:flex fixed left-0 top-0 h-screen flex-col z-50" style="width:280px">
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav class="sidebar hidden md:flex fixed left-0 top-0 h-screen flex-col z-50 overflow-y-auto" style="width:288px">
 
-    <!-- Logo -->
-    <div class="flex items-center gap-2.5 px-5 py-5" style="border-bottom: 1px solid var(--navy-border)">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--accent)">
-            <span class="material-symbols-outlined text-white text-base">rocket_launch</span>
+  <!-- Logo -->
+  <div class="flex items-center gap-2.5 px-5 py-5" style="border-bottom:1px solid var(--navy-border)">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#3B82F6">
+      <span class="material-symbols-outlined text-white" style="font-size:18px">rocket_launch</span>
+    </div>
+    <span class="text-white font-bold text-lg tracking-tight">StepUp</span>
+    <span class="ml-auto font-mono text-xs px-1.5 py-0.5 rounded" style="background:rgba(59,130,246,.2);color:#93C5FD">MVP</span>
+  </div>
+
+  <!-- Dev Mode Banner -->
+  <div class="devmode-banner px-5 py-3">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="material-symbols-outlined text-amber-400" style="font-size:14px">construction</span>
+      <span class="text-amber-400 font-bold text-xs tracking-widest uppercase">Painel de Simulação</span>
+    </div>
+    <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,.4)">
+      Este painel não representa a interface final do usuário. Ele simula múltiplas perspectivas do fluxo em uma tela, para fins de demonstração do MVP.
+    </p>
+  </div>
+
+  <!-- Perspectivas -->
+  <div class="px-4 pt-4 pb-2 flex flex-col gap-1" style="border-bottom:1px solid var(--navy-border)">
+    <p class="text-xs font-semibold mb-2 px-1" style="color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Perspectivas</p>
+
+    <button onclick="alternarSessao('colaborador')" id="nav-btn-colaborador" class="role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-white text-xs font-medium">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-sm">person</span>
+        <div class="text-left">
+          <div class="font-semibold" id="nav-colab-name">—</div>
+          <div style="color:rgba(255,255,255,.35);font-size:10px">Colaborador em onboarding</div>
         </div>
-        <span class="text-white font-bold text-lg tracking-tight">StepUp</span>
-        <span class="ml-auto text-xs font-mono px-1.5 py-0.5 rounded" style="background: rgba(59,130,246,0.2); color: #93C5FD">MVP</span>
-    </div>
+      </div>
+      <span id="nav-badge-colab" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:rgba(59,130,246,.2);color:#93C5FD">0%</span>
+    </button>
 
-    <!-- Dev Mode Banner -->
-    <div class="devmode-banner px-5 py-3">
-        <div class="flex items-center gap-2 mb-1.5">
-            <span class="material-symbols-outlined text-amber-400" style="font-size:15px">construction</span>
-            <span class="text-amber-400 font-bold text-xs tracking-widest uppercase">Painel de Simulação</span>
+    <button onclick="alternarSessao('rh')" id="nav-btn-rh" class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5)">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-sm">badge</span>
+        <div class="text-left">
+          <div class="font-semibold" style="color:rgba(255,255,255,.75)">Mariana Costa</div>
+          <div style="color:rgba(255,255,255,.35);font-size:10px">RH — Contratos e Documentação</div>
         </div>
-        <p class="text-xs leading-relaxed" style="color: rgba(255,255,255,0.45)">
-            Este painel não representa a interface final do usuário. Ele simula múltiplas perspectivas do fluxo em uma única tela, para fins de demonstração do MVP.
-        </p>
-    </div>
+      </div>
+      <div class="relative">
+        <span id="notif-aba-rh" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#F59E0B;display:none"></span>
+        <span id="notif-count-rh" class="hidden font-mono text-xs px-1.5 py-0.5 rounded badge-pop" style="background:#F59E0B;color:#fff;font-size:9px"></span>
+      </div>
+    </button>
 
-    <!-- Perspectivas -->
-    <div class="px-4 py-4 flex flex-col gap-1" style="border-bottom: 1px solid var(--navy-border)">
-        <p class="text-xs font-semibold mb-2 px-1" style="color: rgba(255,255,255,0.35); letter-spacing:0.08em; text-transform:uppercase">Perspectivas do fluxo</p>
-
-        <button onclick="alternarSessaoSimulada('colaborador')" id="nav-btn-colaborador"
-            class="role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-white text-xs font-medium">
-            <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-sm" style="opacity:0.8">person</span>
-                <div class="text-left">
-                    <div class="font-semibold">Pedro Alencar</div>
-                    <div style="color:rgba(255,255,255,0.4); font-size:10px">Candidato em onboarding</div>
-                </div>
-            </div>
-            <span id="nav-badge-colab" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:rgba(59,130,246,0.25); color: #93C5FD">15%</span>
-        </button>
-
-        <button onclick="alternarSessaoSimulada('rh')" id="nav-btn-rh"
-            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
-            <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-sm">badge</span>
-                <div class="text-left">
-                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Mariana Costa</div>
-                    <div style="color:rgba(255,255,255,0.35); font-size:10px">RH — Contratos e Documentação</div>
-                </div>
-            </div>
-            <span id="notif-aba-rh" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#F59E0B"></span>
-        </button>
-
-        <button onclick="alternarSessaoSimulada('ti')" id="nav-btn-ti"
-            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
-            <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-sm">desktop_mac</span>
-                <div class="text-left">
-                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Lucas Rezende</div>
-                    <div style="color:rgba(255,255,255,0.35); font-size:10px">TI — Infraestrutura e Acessos</div>
-                </div>
-            </div>
-            <span id="notif-aba-ti" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#EF4444"></span>
-        </button>
-
-        <button onclick="alternarSessaoSimulada('gestor')" id="nav-btn-gestor"
-            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
-            <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-sm">supervisor_account</span>
-                <div class="text-left">
-                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Carlos Mendes</div>
-                    <div style="color:rgba(255,255,255,0.35); font-size:10px">Gestor — Engenharia</div>
-                </div>
-            </div>
-            <span id="notif-aba-gestor" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#3B82F6"></span>
-        </button>
-    </div>
-
-    <!-- Context footer -->
-    <div class="px-4 py-4 mt-auto">
-        <div class="rounded-lg p-3 flex items-center gap-3" style="background: rgba(255,255,255,0.04); border: 1px solid var(--navy-border)">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background: rgba(59,130,246,0.2)">
-                <span class="material-symbols-outlined text-blue-400" style="font-size:14px" id="nav-role-icon">person</span>
-            </div>
-            <div>
-                <div class="text-xs font-semibold text-white" id="nav-role-name">Pedro Alencar</div>
-                <div class="font-mono" style="font-size:9px; color: rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.08em" id="nav-role-label">Colaborador</div>
-            </div>
+    <button onclick="alternarSessao('ti')" id="nav-btn-ti" class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5)">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-sm">desktop_mac</span>
+        <div class="text-left">
+          <div class="font-semibold" style="color:rgba(255,255,255,.75)">Lucas Rezende</div>
+          <div style="color:rgba(255,255,255,.35);font-size:10px">TI — Infraestrutura e Acessos</div>
         </div>
+      </div>
+      <span id="notif-count-ti" class="hidden font-mono text-xs px-1.5 py-0.5 rounded badge-pop" style="background:#EF4444;color:#fff;font-size:9px"></span>
+    </button>
+
+    <button onclick="alternarSessao('gestor')" id="nav-btn-gestor" class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium" style="color:rgba(255,255,255,.5)">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-sm">supervisor_account</span>
+        <div class="text-left">
+          <div class="font-semibold" style="color:rgba(255,255,255,.75)">Carlos Mendes</div>
+          <div style="color:rgba(255,255,255,.35);font-size:10px">Gestor — Engenharia</div>
+        </div>
+      </div>
+      <span id="notif-count-gestor" class="hidden font-mono text-xs px-1.5 py-0.5 rounded badge-pop" style="background:#3B82F6;color:#fff;font-size:9px"></span>
+    </button>
+  </div>
+
+  <!-- Seletor de colaborador (visível só na aba colaborador) -->
+  <div id="sidebar-worker-list" class="px-4 py-3 flex flex-col gap-1.5 overflow-y-auto" style="border-bottom:1px solid var(--navy-border)">
+    <p class="text-xs font-semibold mb-1 px-1" style="color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Colaboradores</p>
+    <div id="worker-list-nav" class="flex flex-col gap-1"></div>
+  </div>
+
+  <!-- Context footer -->
+  <div class="px-4 py-4 mt-auto">
+    <div class="rounded-lg p-3 flex items-center gap-3" style="background:rgba(255,255,255,.04);border:1px solid var(--navy-border)">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background:rgba(59,130,246,.2)">
+        <span class="material-symbols-outlined text-blue-400" style="font-size:14px" id="nav-role-icon">person</span>
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-white" id="nav-role-name">—</div>
+        <div class="font-mono" style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em" id="nav-role-label">Colaborador</div>
+      </div>
     </div>
+  </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════ MAIN ═══ -->
-<main class="flex-1 flex flex-col min-h-screen" style="margin-left:280px">
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main class="flex-1 flex flex-col min-h-screen" style="margin-left:288px">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 flex items-center justify-between px-8 h-14" style="background:#fff; border-bottom: 1px solid var(--border)">
-        <div class="flex items-center gap-2.5">
-            <span class="breadcrumb-tag">Demo Interativo</span>
-            <span class="material-symbols-outlined text-slate-300" style="font-size:14px">chevron_right</span>
-            <span class="text-xs font-medium text-slate-500" id="header-caminho-contexto">Dashboard do Candidato</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background: #F1F5F9; color: #475569" id="badge-perfil-contexto">Pedro Alencar</span>
-        </div>
-    </header>
-
-    <!-- Body -->
-    <div class="flex-1 p-8 flex flex-col gap-6 max-w-5xl w-full mx-auto">
-
-        <!-- ─── Visão: Colaborador ─── -->
-        <div id="visao-painel-colaborador" class="flex flex-col gap-6">
-
-            <!-- Hero card -->
-            <div class="card-section p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-56 h-full pointer-events-none" style="background: linear-gradient(to left, rgba(59,130,246,0.05), transparent)"></div>
-                <div class="z-10">
-                    <h1 class="text-2xl font-bold text-slate-900 mb-1">Olá, Pedro Alencar 👋</h1>
-                    <p class="text-sm text-slate-500" id="hero-fase-txt">Fase 1: Envio e Validação de Documentos com o RH</p>
-                </div>
-                <div class="z-10 flex items-center gap-4 shrink-0 card px-5 py-4">
-                    <div class="relative w-14 h-14">
-                        <svg class="w-full h-full -rotate-90 absolute inset-0" viewBox="0 0 36 36">
-                            <path stroke="#E2E8F0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
-                            <path id="svg-progresso-path" class="ring-path" stroke="#3B82F6" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="15, 100" stroke-linecap="round" stroke-width="3"></path>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-sm font-bold text-slate-800" id="pizza-porcentagem">15%</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-0.5">Conclusão</div>
-                        <div class="text-sm font-semibold text-slate-800" id="pizza-fases-concluidas">0 de 3 fases</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Alert gargalo -->
-            <div id="container-alerta-gargalo"></div>
-
-            <!-- Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Roteiro -->
-                <div class="lg:col-span-8 card-section p-6 flex flex-col gap-5">
-                    <div style="border-bottom: 1px solid var(--border)" class="pb-4">
-                        <h2 class="text-base font-bold text-slate-900">Roteiro de Integração</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Etapas do seu processo de onboarding</p>
-                    </div>
-                    <div class="flex flex-col gap-7 py-2" id="lista-fases-dinamica"></div>
-                </div>
-
-                <!-- Rede de apoio -->
-                <div class="lg:col-span-4 card-section p-6 flex flex-col gap-4">
-                    <div style="border-bottom: 1px solid var(--border)" class="pb-4">
-                        <h2 class="text-base font-bold text-slate-900">Rede de Apoio</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Seus pontos de contato</p>
-                    </div>
-                    <div class="flex flex-col gap-2.5 pt-1">
-                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
-                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-blue-600" style="background:#DBEAFE">
-                                <span class="material-symbols-outlined text-lg">badge</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-800">Mariana Costa</div>
-                                <div class="text-xs text-slate-400">RH · Contratos</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
-                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-violet-600" style="background:#EDE9FE">
-                                <span class="material-symbols-outlined text-lg">desktop_mac</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-800">Lucas Rezende</div>
-                                <div class="text-xs text-slate-400">TI · Infraestrutura</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
-                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-amber-700" style="background:#FEF3C7">
-                                <span class="material-symbols-outlined text-lg">supervisor_account</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-800">Carlos Mendes</div>
-                                <div class="text-xs text-slate-400">Gestor · Engenharia</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ─── Visão: Gestão ─── -->
-        <div id="visao-painel-gestao" class="hidden flex flex-col gap-6">
-
-            <div class="card-section p-6 flex flex-col gap-5">
-                <div style="border-bottom: 1px solid var(--border)" class="pb-4">
-                    <h2 class="text-base font-bold text-slate-900" id="titulo-fila-gestao">Fila Operacional</h2>
-                    <p class="text-xs text-slate-500 mt-0.5" id="desc-fila-gestao">Valide as demandas da sua área para avançar o processo.</p>
-                </div>
-
-                <div class="overflow-x-auto -mx-1">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="text-left rounded-tl-lg">Colaborador</th>
-                                <th class="text-left">Etapa</th>
-                                <th class="text-left">Responsável</th>
-                                <th class="text-left">Status</th>
-                                <th class="text-left">Prazo</th>
-                                <th class="text-center rounded-tr-lg">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="font-semibold text-slate-900">Pedro Alencar</td>
-                                <td><span id="tabela-etapa-badge" class="font-mono text-xs px-2 py-1 rounded" style="background:#F1F5F9; color:#475569; font-size:11px">DOCUMENTACAO_RH</span></td>
-                                <td class="font-semibold text-blue-600" id="tabela-setor-responsavel">RH</td>
-                                <td id="tabela-estado-badge"><span class="chip chip-amber">⏳ Em andamento</span></td>
-                                <td class="text-xs text-slate-400 font-medium">23/05/2026</td>
-                                <td class="text-center"><div id="container-botao-acao-gestao"></div></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Checklist interno -->
-                <div class="rounded-xl p-5" style="background:#F8FAFC; border: 1px solid var(--border)">
-                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-slate-400" style="font-size:15px">fact_check</span>
-                        Checklist Interno da Demanda
-                    </h3>
-                    <div id="checklist-demandas-setor" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
-                </div>
-            </div>
-        </div>
-
+  <!-- Header -->
+  <header class="sticky top-0 z-40 flex items-center justify-between px-8 h-14" style="background:#fff;border-bottom:1px solid var(--border)">
+    <div class="flex items-center gap-2.5">
+      <span class="breadcrumb-tag">Demo Interativo</span>
+      <span class="material-symbols-outlined text-slate-300" style="font-size:14px">chevron_right</span>
+      <span class="text-xs font-medium text-slate-500" id="header-contexto">Dashboard do Colaborador</span>
     </div>
+    <div class="flex items-center gap-3">
+      <!-- SINO DE NOTIFICAÇÕES -->
+      <div class="relative" id="notif-wrapper">
+        <button class="notif-btn" id="notif-bell-btn" onclick="toggleNotifDropdown()" title="Notificações">
+          <span class="material-symbols-outlined text-slate-500" style="font-size:19px" id="notif-bell-icon">notifications</span>
+          <span id="notif-bell-badge" class="notif-badge hidden">0</span>
+        </button>
+        <!-- Dropdown -->
+        <div id="notif-dropdown" class="notif-dropdown hidden">
+          <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border)">
+            <span class="text-sm font-bold text-slate-900">Notificações</span>
+            <button onclick="marcarTodasLidas()" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">Marcar todas como lidas</button>
+          </div>
+          <div id="notif-lista" class="overflow-y-auto" style="max-height:360px"></div>
+          <div class="px-4 py-3 text-center" style="border-top:1px solid var(--border)">
+            <span class="text-xs text-slate-400">Sistema de notificações em tempo real · MVP</span>
+          </div>
+        </div>
+      </div>
+      <span class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#F1F5F9;color:#475569" id="badge-perfil">—</span>
+    </div>
+  </header>
+
+  <div class="flex-1 p-8 flex flex-col gap-6 max-w-5xl w-full mx-auto">
+
+    <!-- ─── VISÃO: COLABORADOR ─── -->
+    <div id="visao-colaborador" class="flex flex-col gap-6">
+      <!-- Hero -->
+      <div class="card p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <div class="absolute right-0 top-0 w-56 h-full pointer-events-none" style="background:linear-gradient(to left,rgba(59,130,246,.05),transparent)"></div>
+        <div class="z-10">
+          <h1 class="text-2xl font-bold text-slate-900 mb-1">Olá, <span id="hero-nome">—</span> 👋</h1>
+          <p class="text-sm text-slate-500" id="hero-fase-txt">—</p>
+        </div>
+        <div class="z-10 flex items-center gap-4 shrink-0 card px-5 py-4">
+          <div class="relative w-14 h-14">
+            <svg class="w-full h-full -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+              <path stroke="#E2E8F0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3.2"></path>
+              <path id="svg-ring" class="ring-path" stroke="#3B82F6" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="0,100" stroke-linecap="round" stroke-width="3.2"></path>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-sm font-bold text-slate-800" id="hero-pct">0%</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-0.5">Conclusão</div>
+            <div class="text-sm font-semibold text-slate-800" id="hero-fases">0 de 3 fases</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta status -->
+      <div id="container-alerta"></div>
+
+      <!-- Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 card p-6 flex flex-col gap-5" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="border-bottom:1px solid var(--border)" class="pb-4">
+            <h2 class="text-base font-bold text-slate-900">Roteiro de Integração</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Etapas do seu processo de onboarding</p>
+          </div>
+          <div class="flex flex-col gap-7 py-2" id="lista-fases"></div>
+        </div>
+        <div class="lg:col-span-4 card p-6 flex flex-col gap-4" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="border-bottom:1px solid var(--border)" class="pb-4">
+            <h2 class="text-base font-bold text-slate-900">Rede de Apoio</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Seus pontos de contato</p>
+          </div>
+          <div class="flex flex-col gap-2 pt-1">
+            <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC;border:1px solid var(--border)">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center text-blue-600" style="background:#DBEAFE">
+                <span class="material-symbols-outlined text-lg">badge</span></div>
+              <div><div class="text-sm font-semibold text-slate-800">Mariana Costa</div><div class="text-xs text-slate-400">RH · Contratos</div></div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC;border:1px solid var(--border)">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center text-violet-600" style="background:#EDE9FE">
+                <span class="material-symbols-outlined text-lg">desktop_mac</span></div>
+              <div><div class="text-sm font-semibold text-slate-800">Lucas Rezende</div><div class="text-xs text-slate-400">TI · Infraestrutura</div></div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC;border:1px solid var(--border)">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center text-amber-700" style="background:#FEF3C7">
+                <span class="material-symbols-outlined text-lg">supervisor_account</span></div>
+              <div><div class="text-sm font-semibold text-slate-800">Carlos Mendes</div><div class="text-xs text-slate-400">Gestor · Engenharia</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── VISÃO: RH ─── -->
+    <div id="visao-rh" class="hidden flex flex-col gap-6">
+      <div class="card p-6 flex flex-col gap-5" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <div class="flex items-center justify-between" style="border-bottom:1px solid var(--border);padding-bottom:16px">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Fila Operacional · Recursos Humanos</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Gerencie documentação dos colaboradores. Ao salvar progresso, os próximos setores são avisados automaticamente.</p>
+          </div>
+          <button onclick="abrirModalNovoColaborador()" class="btn-primary">
+            <span class="material-symbols-outlined" style="font-size:15px">person_add</span>
+            Novo Colaborador
+          </button>
+        </div>
+        <div id="tabela-rh"></div>
+      </div>
+    </div>
+
+    <!-- ─── VISÃO: TI ─── -->
+    <div id="visao-ti" class="hidden flex flex-col gap-6">
+      <div class="card p-6 flex flex-col gap-5" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
+          <h2 class="text-base font-bold text-slate-900">Fila Operacional · Equipe de TI</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Configure os acessos e hardware dos colaboradores que já passaram pelo RH. Salve o progresso parcial a qualquer momento.</p>
+        </div>
+        <div id="tabela-ti"></div>
+      </div>
+    </div>
+
+    <!-- ─── VISÃO: GESTOR ─── -->
+    <div id="visao-gestor" class="hidden flex flex-col gap-6">
+      <div class="card p-6 flex flex-col gap-5" style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
+          <h2 class="text-base font-bold text-slate-900">Visão Geral · Gestor de Área</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Acompanhe todos os colaboradores em onboarding. Passe o mouse sobre o responsável para detalhes. Clique em "Gerenciar tarefas" quando chegar sua vez.</p>
+        </div>
+        <div id="tabela-gestor"></div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
+<!-- ═══════════════════ MODAL NOVO COLABORADOR ═══════════════════ -->
+<div id="modal" class="hidden modal-backdrop" onclick="fecharModalSeFora(event)">
+  <div class="modal p-6 flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-bold text-slate-900">Cadastrar Novo Colaborador</h3>
+      <button onclick="fecharModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-slate-600 block mb-1">Nome completo</label>
+        <input id="input-nome" type="text" placeholder="Ex: Ana Lima" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-600 block mb-1">Cargo</label>
+        <input id="input-cargo" type="text" placeholder="Ex: Designer de Produto" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-600 block mb-1">Gestor responsável</label>
+        <select id="input-gestor" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <option value="Carlos Mendes">Carlos Mendes — Engenharia</option>
+          <option value="Fernanda Alves">Fernanda Alves — Produto</option>
+          <option value="Rafael Souza">Rafael Souza — Design</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 pt-1">
+      <button onclick="fecharModal()" class="btn-sm">Cancelar</button>
+      <button onclick="cadastrarColaborador()" class="btn-primary">
+        <span class="material-symbols-outlined" style="font-size:14px">check</span>
+        Cadastrar e Iniciar Fluxo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL DETALHE TAREFAS ═══════════════════ -->
+<div id="modal-tarefas" class="hidden modal-backdrop" onclick="fecharModalTarefasSeFora(event)">
+  <div class="modal p-6 flex flex-col gap-4" style="max-width:520px">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-bold text-slate-900" id="modal-tarefas-titulo">Tarefas</h3>
+        <p class="text-xs text-slate-400 mt-0.5" id="modal-tarefas-sub"></p>
+      </div>
+      <button onclick="fecharModalTarefas()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+    <div id="modal-tarefas-lista" class="flex flex-col gap-2"></div>
+    <div class="flex justify-between items-center pt-2" style="border-top:1px solid var(--border)">
+      <p class="text-xs text-slate-400" id="modal-tarefas-hint"></p>
+      <div class="flex gap-2">
+        <button onclick="fecharModalTarefas()" class="btn-sm">Fechar</button>
+        <button onclick="salvarTarefasModal()" class="btn-primary" id="btn-salvar-tarefas">
+          <span class="material-symbols-outlined" style="font-size:14px">save</span>
+          Salvar Progresso
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup do Responsável (tooltip) -->
+<div id="resp-popup" class="resp-popup hidden"></div>
+
 <script>
-    let estadoOnboarding = {
-        colaborador_nome: "Pedro Alencar",
-        etapa_atual: "DOCUMENTACAO_RH",
-        prazo_limite: "23/05/2026"
-    };
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO CENTRAL
+// ═══════════════════════════════════════════════════════════
 
-    let sessaoAtiva = 'colaborador';
+const FASES = [
+  {
+    chave: 'DOCUMENTACAO_RH',
+    titulo: 'Fase 1 — Documentação com o RH',
+    desc: 'Formalização legal e envio de documentos obrigatórios.',
+    setor: 'rh',
+    tarefas: [
+      'Assinatura do Contrato de Trabalho Digital',
+      'Envio de Documentos de Identificação (RG/CPF)',
+      'Preenchimento do Plano de Benefícios'
+    ]
+  },
+  {
+    chave: 'ACESSOS_TI',
+    titulo: 'Fase 2 — Preparação pela TI',
+    desc: 'Criação de contas corporativas e provisionamento de hardware.',
+    setor: 'ti',
+    tarefas: [
+      'Configuração do E-mail Corporativo',
+      'Provisionamento e Setup do Notebook',
+      'Geração de Credenciais e VPN'
+    ]
+  },
+  {
+    chave: 'APRESENTACAO_GESTOR',
+    titulo: 'Fase 3 — Alinhamento com o Gestor',
+    desc: 'Boas-vindas, apresentação de equipe e definição de metas.',
+    setor: 'gestor',
+    tarefas: [
+      'Reunião de Alinhamento 1:1',
+      'Apresentação para o Time de Engenharia',
+      'Definição das Metas dos Primeiros 30 Dias'
+    ]
+  }
+];
 
-    const roleConfig = {
-        'rh':     { nome: "Recursos Humanos", icon: "badge",              label: "RH",      desc: "Analise e aprove a documentação do colaborador para avançar para a TI." },
-        'ti':     { nome: "Equipe de TI",      icon: "desktop_mac",       label: "TI",      desc: "Prepare os acessos e hardware do colaborador antes de notificar o Gestor." },
-        'gestor': { nome: "Gestor de Área",    icon: "supervisor_account", label: "Gestor", desc: "Acompanhe e conclua a integração do colaborador na sua equipe." }
-    };
+let colaboradores = [
+  {
+    id: 1,
+    nome: 'Pedro Alencar',
+    cargo: 'Engenheiro de Software',
+    gestor: 'Carlos Mendes',
+    tarefasConcluidas: { DOCUMENTACAO_RH: [], ACESSOS_TI: [], APRESENTACAO_GESTOR: [] },
+    prazo: '23/05/2026',
+    atrasoNotificado: { DOCUMENTACAO_RH: false, ACESSOS_TI: false, APRESENTACAO_GESTOR: false },
+    turnoNotificado: { rh: false, ti: false, gestor: false }
+  },
+  {
+    id: 2,
+    nome: 'Camila Torres',
+    cargo: 'UX Designer',
+    gestor: 'Fernanda Alves',
+    tarefasConcluidas: { DOCUMENTACAO_RH: [0,1], ACESSOS_TI: [], APRESENTACAO_GESTOR: [] },
+    prazo: '26/05/2026',
+    atrasoNotificado: { DOCUMENTACAO_RH: false, ACESSOS_TI: false, APRESENTACAO_GESTOR: false },
+    turnoNotificado: { rh: false, ti: false, gestor: false }
+  },
+  {
+    id: 3,
+    nome: 'Rafael Martins',
+    cargo: 'Designer Gráfico',
+    gestor: 'Rafael Souza',
+    tarefasConcluidas: { DOCUMENTACAO_RH: [], ACESSOS_TI: [], APRESENTACAO_GESTOR: [] },
+    prazo: '19/05/2026',   // atrasado
+    atrasoNotificado: { DOCUMENTACAO_RH: false, ACESSOS_TI: false, APRESENTACAO_GESTOR: false },
+    turnoNotificado: { rh: false, ti: false, gestor: false }
+  }
+];
 
-    const roteiroConfig = [
-        {
-            chave: 'DOCUMENTACAO_RH',
-            titulo: 'Fase 1 — Documentação com o RH',
-            desc: 'Formalização legal e envio de documentos obrigatórios.',
-            tarefas: ['Assinatura do Contrato de Trabalho Digital', 'Envio de Documentos de Identificação (RG/CPF)', 'Preenchimento do Plano de Benefícios']
-        },
-        {
-            chave: 'ACESSOS_TI',
-            titulo: 'Fase 2 — Preparação pela TI',
-            desc: 'Criação de contas corporativas e provisionamento do hardware.',
-            tarefas: ['Configuração do E-mail Corporativo', 'Provisionamento e Setup do Notebook', 'Geração de Credenciais e VPN']
-        },
-        {
-            chave: 'APRESENTACAO_GESTOR',
-            titulo: 'Fase 3 — Alinhamento com o Gestor',
-            desc: 'Boas-vindas, apresentação de equipe e definição de metas.',
-            tarefas: ['Reunião de Alinhamento 1:1', 'Apresentação para o Time de Engenharia', 'Definição das Metas dos Primeiros 30 Dias']
-        }
-    ];
+let nextId = 4;
+let sessaoAtiva = 'colaborador';
+let colaboradorSelecionadoId = 1;
 
-    function alternarSessaoSimulada(sessao) {
-        sessaoAtiva = sessao;
+let modalCtx = { colaboradorId: null, fase: null, setor: null };
 
-        ['colaborador', 'rh', 'ti', 'gestor'].forEach(s => {
-            const btn = document.getElementById(`nav-btn-${s}`);
-            if (btn) btn.className = "role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium";
-        });
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
 
-        const btnAtivo = document.getElementById(`nav-btn-${sessao}`);
-        if (btnAtivo) btnAtivo.className = "role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-white text-xs font-medium";
+function getColaborador(id) { return colaboradores.find(c => c.id === id); }
 
-        const roleIcon  = document.getElementById('nav-role-icon');
-        const roleName  = document.getElementById('nav-role-name');
-        const roleLabel = document.getElementById('nav-role-label');
-        const badge     = document.getElementById('badge-perfil-contexto');
-        const caminho   = document.getElementById('header-caminho-contexto');
+function getFaseAtual(colab) {
+  for (const fase of FASES) {
+    const concl = colab.tarefasConcluidas[fase.chave] || [];
+    if (concl.length < fase.tarefas.length) return fase.chave;
+  }
+  return 'CONCLUIDO';
+}
 
-        if (sessao === 'colaborador') {
-            roleIcon.innerText  = "person";
-            roleName.innerText  = "Pedro Alencar";
-            roleLabel.innerText = "Colaborador";
-            badge.innerText     = "Pedro Alencar";
-            caminho.innerText   = "Dashboard do Candidato";
-            document.getElementById('visao-painel-colaborador').classList.remove('hidden');
-            document.getElementById('visao-painel-gestao').classList.add('hidden');
-            document.getElementById('notif-aba-rh').classList.add('hidden');
-            renderizarDashboardPedro();
-        } else {
-            const rc = roleConfig[sessao];
-            roleIcon.innerText  = rc.icon;
-            roleName.innerText  = document.querySelector(`#nav-btn-${sessao} .font-semibold`).innerText;
-            roleLabel.innerText = rc.label;
-            badge.innerText     = `Mesa: ${rc.nome}`;
-            caminho.innerText   = `Operacional · ${rc.nome}`;
-            document.getElementById('visao-painel-colaborador').classList.add('hidden');
-            document.getElementById('visao-painel-gestao').classList.remove('hidden');
-            document.getElementById(`notif-aba-${sessao}`).classList.add('hidden');
-            renderizarPainelGestao(sessao);
-        }
+function faseConcluida(colab, chave) {
+  const fase = FASES.find(f => f.chave === chave);
+  const concl = colab.tarefasConcluidas[chave] || [];
+  return concl.length === fase.tarefas.length;
+}
+
+function calcPorcentagem(colab) {
+  const totalTarefas = FASES.reduce((acc, f) => acc + f.tarefas.length, 0);
+  const feitas = FASES.reduce((acc, f) => acc + (colab.tarefasConcluidas[f.chave] || []).length, 0);
+  return Math.round((feitas / totalTarefas) * 100);
+}
+
+function fasesConcluidas(colab) {
+  return FASES.filter(f => faseConcluida(colab, f.chave)).length;
+}
+
+function pendentesNoSetor(setor) {
+  const faseDoSetor = FASES.find(f => f.setor === setor);
+  if (!setor || !faseDoSetor) return 0;
+  return colaboradores.filter(c => {
+    const faseIdx = FASES.findIndex(f => f.setor === setor);
+    if (faseIdx === 0) return !faseConcluida(c, faseDoSetor.chave);
+    else {
+      const faseAnterior = FASES[faseIdx - 1];
+      return faseConcluida(c, faseAnterior.chave) && !faseConcluida(c, faseDoSetor.chave);
+    }
+  }).length;
+}
+
+function parseData(prazoStr) {
+  const [d, m, a] = prazoStr.split('/').map(Number);
+  return new Date(a, m-1, d);
+}
+
+function diasAtraso(colab, faseChave) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const dataPrazo = parseData(colab.prazo);
+  const diff = hoje - dataPrazo;
+  return Math.floor(diff / (1000*60*60*24));
+}
+
+function responsavelAtual(colab) {
+  const faseAtual = getFaseAtual(colab);
+  if (faseAtual === 'CONCLUIDO') return 'Integrado';
+  const fase = FASES.find(f => f.chave === faseAtual);
+  const nomes = { rh: 'Mariana Costa', ti: 'Lucas Rezende', gestor: 'Carlos Mendes' };
+  return nomes[fase.setor] || '—';
+}
+
+function responsavelDetalhes(colab) {
+  const faseAtual = getFaseAtual(colab);
+  if (faseAtual === 'CONCLUIDO') return { nome: 'Integrado', setor: '', cargo: '' };
+  const fase = FASES.find(f => f.chave === faseAtual);
+  const info = {
+    rh: { nome: 'Mariana Costa', setor: 'RH', cargo: 'Contratos e Documentação' },
+    ti: { nome: 'Lucas Rezende', setor: 'TI', cargo: 'Infraestrutura e Acessos' },
+    gestor: { nome: 'Carlos Mendes', setor: 'Gestor', cargo: 'Engenharia' }
+  };
+  return info[fase.setor] || { nome: '—', setor: '—', cargo: '—' };
+}
+
+function atualizarBadgesSidebar() {
+  ['rh','ti','gestor'].forEach(setor => {
+    const count = pendentesNoSetor(setor);
+    const el = document.getElementById(`notif-count-${setor}`);
+    if (el) {
+      if (count > 0 && sessaoAtiva !== setor) {
+        el.textContent = count;
+        el.classList.remove('hidden');
+        el.style.display = '';
+      } else {
+        el.classList.add('hidden');
+        el.style.display = 'none';
+      }
+    }
+  });
+  const colab = getColaborador(colaboradorSelecionadoId);
+  if (colab) {
+    const pct = calcPorcentagem(colab);
+    document.getElementById('nav-badge-colab').textContent = `${pct}%`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════
+
+function alternarSessao(sessao) {
+  sessaoAtiva = sessao;
+  ['colaborador','rh','ti','gestor'].forEach(s => {
+    const btn = document.getElementById(`nav-btn-${s}`);
+    if (btn) btn.className = 'role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium';
+    btn.style.color = 'rgba(255,255,255,.5)';
+  });
+  const btnAtivo = document.getElementById(`nav-btn-${sessao}`);
+  btnAtivo.className = 'role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-white text-xs font-medium';
+  btnAtivo.style.color = '';
+
+  ['colaborador','rh','ti','gestor'].forEach(s => document.getElementById(`visao-${s}`).classList.add('hidden'));
+  document.getElementById(`visao-${sessao}`).classList.remove('hidden');
+
+  const roleIcons = { colaborador:'person', rh:'badge', ti:'desktop_mac', gestor:'supervisor_account' };
+  const roleLabels = { colaborador:'Colaborador', rh:'RH', ti:'TI', gestor:'Gestor' };
+  const roleNames  = { colaborador: (getColaborador(colaboradorSelecionadoId)||{}).nome||'—', rh:'Mariana Costa', ti:'Lucas Rezende', gestor:'Carlos Mendes' };
+  const roleCtx    = { colaborador:'Dashboard do Colaborador', rh:'Operacional · Recursos Humanos', ti:'Operacional · Equipe de TI', gestor:'Operacional · Gestor de Área' };
+
+  document.getElementById('nav-role-icon').textContent = roleIcons[sessao];
+  document.getElementById('nav-role-name').textContent = roleNames[sessao];
+  document.getElementById('nav-role-label').textContent = roleLabels[sessao];
+  document.getElementById('header-contexto').textContent = roleCtx[sessao];
+  document.getElementById('badge-perfil').textContent = sessao === 'colaborador' ? roleNames[sessao] : `Mesa: ${['Recursos Humanos','Equipe de TI','Gestor de Área'][['rh','ti','gestor'].indexOf(sessao)]}`;
+  document.getElementById('sidebar-worker-list').style.display = sessao === 'colaborador' ? '' : 'none';
+
+  if (sessao === 'colaborador') renderizarDashboardColaborador();
+  else if (sessao === 'rh')     { renderizarTabelaRH(); verificarAtrasosSetor('rh'); }
+  else if (sessao === 'ti')     { renderizarTabelaTI(); verificarAtrasosSetor('ti'); }
+  else if (sessao === 'gestor') {
+    renderizarTabelaGestor();
+    verificarAtrasosSetor('rh');
+    verificarAtrasosSetor('ti');
+    verificarAtrasosSetor('gestor');
+  }
+
+  atualizarBadgesSidebar();
+  renderizarNotificacoes();
+  esconderPopup();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR: lista de colaboradores
+// ═══════════════════════════════════════════════════════════
+
+function renderizarWorkerList() {
+  const container = document.getElementById('worker-list-nav');
+  container.innerHTML = colaboradores.map(c => {
+    const pct = calcPorcentagem(c);
+    const sel = c.id === colaboradorSelecionadoId;
+    return `<button onclick="selecionarColaborador(${c.id})" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all" style="background:${sel ? 'rgba(59,130,246,.12)' : 'transparent'};border:1px solid ${sel ? 'rgba(59,130,246,.3)' : 'transparent'}">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style="background:${sel ? '#3B82F6' : 'rgba(255,255,255,.1)'};color:${sel ? '#fff' : 'rgba(255,255,255,.5)'}">${c.nome.charAt(0)}</div>
+      <div class="flex-1 min-w-0"><div class="text-xs font-semibold truncate" style="color:${sel ? '#fff' : 'rgba(255,255,255,.7)'}">${c.nome}</div><div style="font-size:9px;color:rgba(255,255,255,.3)">${pct}% concluído</div></div>
+    </button>`;
+  }).join('');
+}
+
+function selecionarColaborador(id) {
+  colaboradorSelecionadoId = id;
+  renderizarWorkerList();
+  renderizarDashboardColaborador();
+  atualizarBadgesSidebar();
+  renderizarNotificacoes();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD COLABORADOR
+// ═══════════════════════════════════════════════════════════
+
+function renderizarDashboardColaborador() {
+  const colab = getColaborador(colaboradorSelecionadoId);
+  if (!colab) return;
+  const pct = calcPorcentagem(colab);
+  const fasesConcl = fasesConcluidas(colab);
+  const faseAtual = getFaseAtual(colab);
+  let faseAtualTxt = 'Onboarding concluído — você está 100% operacional!';
+  if (faseAtual !== 'CONCLUIDO') {
+    const f = FASES.find(f => f.chave === faseAtual);
+    const concl = colab.tarefasConcluidas[faseAtual] || [];
+    const total = f.tarefas.length;
+    const parcial = concl.length > 0 && concl.length < total;
+    faseAtualTxt = f.titulo + (parcial ? ` (${concl.length}/${total} tarefas)` : '');
+  }
+  document.getElementById('hero-nome').textContent = colab.nome;
+  document.getElementById('hero-fase-txt').textContent = faseAtualTxt;
+  document.getElementById('hero-pct').textContent = `${pct}%`;
+  document.getElementById('hero-fases').textContent = `${fasesConcl} de ${FASES.length} fases`;
+  document.getElementById('svg-ring').setAttribute('stroke-dasharray', `${pct},100`);
+  document.getElementById('nav-colab-name').textContent = colab.nome;
+  document.getElementById('nav-badge-colab').textContent = `${pct}%`;
+
+  const alertEl = document.getElementById('container-alerta');
+  if (faseAtual !== 'CONCLUIDO') {
+    const f = FASES.find(f => f.chave === faseAtual);
+    const concl = colab.tarefasConcluidas[faseAtual] || [];
+    const total = f.tarefas.length;
+    const setorLabel = { rh:'RH', ti:'TI', gestor:'Gestor' }[f.setor];
+    const parcial = concl.length > 0 && concl.length < total;
+    alertEl.innerHTML = `<div class="alert-warn flex items-start gap-3 px-5 py-4 rounded-xl"><span class="material-symbols-outlined text-amber-500 shrink-0" style="font-size:18px">${parcial ? 'pending_actions' : 'schedule'}</span><div><p class="text-sm font-semibold mb-0.5 text-amber-900">${parcial ? 'Em andamento no ' + setorLabel : 'Aguardando o ' + setorLabel}</p><p class="text-xs leading-relaxed text-amber-800 opacity-80">${parcial ? `O departamento de <strong>${setorLabel}</strong> já concluiu ${concl.length} de ${total} tarefas nesta etapa. O processo continua em andamento.` : `Seu onboarding está sob responsabilidade do <strong>${setorLabel}</strong>, aguardando início das tarefas desta etapa.`}</p></div></div>`;
+  } else {
+    alertEl.innerHTML = `<div class="alert-success flex items-start gap-3 px-5 py-4 rounded-xl"><span class="material-symbols-outlined text-emerald-600 shrink-0" style="font-size:18px">verified</span><div><p class="text-sm font-semibold mb-0.5 text-emerald-900">Integração concluída 🎉</p><p class="text-xs text-emerald-800 opacity-80">Seu ecossistema de acesso e ferramentas está ativo. Bem-vindo à equipe!</p></div></div>`;
+  }
+
+  const listaEl = document.getElementById('lista-fases');
+  listaEl.innerHTML = '';
+  let faseAtualEncontrada = false;
+  FASES.forEach((fase, idx) => {
+    const concl = colab.tarefasConcluidas[fase.chave] || [];
+    const total = fase.tarefas.length;
+    const done = concl.length === total;
+    const partial = concl.length > 0 && !done;
+    const isLast = idx === FASES.length - 1;
+    let acessivel = idx === 0;
+    if (idx > 0) acessivel = faseConcluida(colab, FASES[idx-1].chave);
+    let tipo = 'locked';
+    if (done) tipo = 'done';
+    else if (partial && acessivel) { tipo = 'partial'; faseAtualEncontrada = true; }
+    else if (!faseAtualEncontrada && acessivel && !done) { tipo = 'active'; faseAtualEncontrada = true; }
+    const dotClass = tipo;
+    const dotIcon = { done:'check', partial:'pending_actions', active:'pending', locked:'lock' }[tipo];
+    const opacity = tipo === 'locked' ? 'opacity-30' : tipo === 'done' ? 'opacity-60' : '';
+    let conteudoTarefas = '';
+    if (tipo === 'active' || tipo === 'partial') {
+      conteudoTarefas = `<div class="flex flex-col gap-2 p-4 rounded-lg mt-3" style="background:#F8FAFC;border:1px solid var(--border)">${fase.tarefas.map((t,i) => { const feita = concl.includes(i); return `<label class="flex items-start gap-3 cursor-default"><input type="checkbox" ${feita ? 'checked' : ''} disabled class="mt-0.5 w-4 h-4 rounded"><span class="text-xs font-medium ${feita ? 'text-slate-400 line-through' : 'text-slate-700'}">${t}${!feita ? ' <span class="font-mono text-amber-600" style="font-size:10px">· aguardando aprovação</span>' : ''}</span></label>`; }).join('')}</div>`;
+    } else if (tipo === 'done') {
+      conteudoTarefas = `<div class="flex flex-col gap-1 mt-2">${fase.tarefas.map(t => `<div class="flex items-center gap-2 text-xs text-slate-400 line-through"><span class="material-symbols-outlined text-emerald-500" style="font-size:12px">done</span>${t}</div>`).join('')}</div>`;
+    }
+    const titleColor = { done:'text-emerald-700', partial:'text-amber-700', active:'text-blue-700', locked:'text-slate-700' }[tipo];
+    const chipHtml = tipo === 'active' ? `<span class="chip chip-blue">Em andamento</span>` : tipo === 'partial' ? `<span class="chip chip-amber">${concl.length}/${total} tarefas</span>` : tipo === 'done' ? `<span class="chip chip-green">Concluída</span>` : '';
+    listaEl.innerHTML += `<div class="relative flex gap-4 ${opacity}">${!isLast ? '<div class="step-line"></div>' : ''}<div class="step-dot ${dotClass} shrink-0"><span class="material-symbols-outlined" style="font-size:15px">${dotIcon}</span></div><div class="flex-1 pb-1"><div class="flex items-center gap-2 mb-0.5 flex-wrap"><h3 class="text-sm font-bold ${titleColor}">${fase.titulo}</h3>${chipHtml}</div><p class="text-xs text-slate-400">${fase.desc}</p>${conteudoTarefas}</div></div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABELAS OPERACIONAIS (RH, TI)
+// ═══════════════════════════════════════════════════════════
+
+function renderizarTabelaRH() {
+  const container = document.getElementById('tabela-rh');
+  const faseRH = FASES[0];
+  const rows = colaboradores.map(c => {
+    const concl = c.tarefasConcluidas['DOCUMENTACAO_RH'] || [];
+    const total = faseRH.tarefas.length;
+    const done = concl.length === total;
+    const atrasoDias = diasAtraso(c, 'DOCUMENTACAO_RH');
+    const isAtrasado = !done && atrasoDias > 0;
+    let statusHtml;
+    if (done) statusHtml = `<span class="chip chip-green">✅ Concluído</span>`;
+    else if (concl.length > 0) statusHtml = `<span class="chip chip-amber">⏳ ${concl.length}/${total} tarefas</span>`;
+    else statusHtml = `<span class="chip chip-slate">Não iniciado</span>`;
+    if (isAtrasado) statusHtml += ` <span class="chip chip-red">Atrasado ${atrasoDias}d</span>`;
+    const btnHtml = done ? `<span class="text-xs text-emerald-600 italic">Finalizado</span>` : `<button onclick="abrirModalTarefas(${c.id},'DOCUMENTACAO_RH','rh')" class="btn-sm"><span class="material-symbols-outlined" style="font-size:13px">edit_note</span> Gerenciar tarefas</button>`;
+    return `<tr class="${isAtrasado ? 'bg-red-50' : ''}"><td><div class="font-semibold text-slate-900">${c.nome}</div><div class="text-xs text-slate-400">${c.cargo}</div></td><td>${statusHtml}</td><td class="text-xs text-slate-500">${c.prazo}</td><td>${btnHtml}</td></tr>`;
+  }).join('');
+  container.innerHTML = `<table><thead><tr><th>Colaborador</th><th>Status RH</th><th>Prazo</th><th style="text-align:center">Ação</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderizarTabelaTI() {
+  const container = document.getElementById('tabela-ti');
+  const faseTI = FASES[1];
+  const elegíveis = colaboradores.filter(c => faseConcluida(c, 'DOCUMENTACAO_RH'));
+  if (!elegíveis.length) { container.innerHTML = `<p class="text-sm text-slate-400 py-4 text-center">Nenhum colaborador liberado pelo RH ainda.</p>`; return; }
+  const rows = elegíveis.map(c => {
+    const concl = c.tarefasConcluidas['ACESSOS_TI'] || [];
+    const total = faseTI.tarefas.length;
+    const done = concl.length === total;
+    const atrasoDias = diasAtraso(c, 'ACESSOS_TI');
+    const isAtrasado = !done && atrasoDias > 0;
+    let statusHtml;
+    if (done) statusHtml = `<span class="chip chip-green">✅ Concluído</span>`;
+    else if (concl.length > 0) statusHtml = `<span class="chip chip-amber">⏳ ${concl.length}/${total} tarefas</span>`;
+    else statusHtml = `<span class="chip chip-red">🔔 Aguardando TI</span>`;
+    if (isAtrasado) statusHtml += ` <span class="chip chip-red">Atrasado ${atrasoDias}d</span>`;
+    const btnHtml = done ? `<span class="text-xs text-emerald-600 italic">Finalizado</span>` : `<button onclick="abrirModalTarefas(${c.id},'ACESSOS_TI','ti')" class="btn-sm"><span class="material-symbols-outlined" style="font-size:13px">edit_note</span> Gerenciar tarefas</button>`;
+    return `<tr class="${isAtrasado ? 'bg-red-50' : ''}"><td><div class="font-semibold text-slate-900">${c.nome}</div><div class="text-xs text-slate-400">${c.cargo}</div></td><td>${statusHtml}</td><td class="font-mono text-xs px-2 py-1 rounded" style="background:#F1F5F9;color:#475569;font-size:11px">ACESSOS_TI</td><td class="text-xs text-slate-500">${c.prazo}</td><td>${btnHtml}</td></tr>`;
+  }).join('');
+  container.innerHTML = `<table><thead><tr><th>Colaborador</th><th>Status TI</th><th>Etapa</th><th>Prazo</th><th style="text-align:center">Ação</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABELA GESTOR (visão geral + botão de ação)
+// ═══════════════════════════════════════════════════════════
+
+function renderizarTabelaGestor() {
+  const container = document.getElementById('tabela-gestor');
+  if (!colaboradores.length) { container.innerHTML = `<p class="text-sm text-slate-400 py-4 text-center">Nenhum colaborador cadastrado.</p>`; return; }
+  const rows = colaboradores.map(c => {
+    const faseAtual = getFaseAtual(c);
+    const resp = responsavelAtual(c);
+    const detalhes = responsavelDetalhes(c);
+    const atrasoDias = faseAtual !== 'CONCLUIDO' ? diasAtraso(c, faseAtual) : 0;
+    const isAtrasado = faseAtual !== 'CONCLUIDO' && atrasoDias > 0;
+    const pct = calcPorcentagem(c);
+
+    let statusHtml;
+    if (faseAtual === 'CONCLUIDO') statusHtml = `<span class="chip chip-green">✅ 100% Integrado</span>`;
+    else {
+      const fase = FASES.find(f => f.chave === faseAtual);
+      const concl = c.tarefasConcluidas[faseAtual] || [];
+      const total = fase.tarefas.length;
+      statusHtml = concl.length > 0 ? `<span class="chip chip-blue">⏳ ${concl.length}/${total} · ${pct}%</span>` : `<span class="chip chip-slate">Não iniciado</span>`;
+    }
+    if (isAtrasado) statusHtml += ` <span class="chip chip-red">Atrasado ${atrasoDias}d</span>`;
+
+    const respHtml = faseAtual === 'CONCLUIDO'
+      ? `<span class="text-xs font-medium text-emerald-700">${resp}</span>`
+      : `<span class="text-xs font-medium text-blue-700 cursor-pointer hover:underline relative" onmouseenter="mostrarPopup(event, '${detalhes.nome}', '${detalhes.setor}', '${detalhes.cargo}')" onmouseleave="esconderPopup()" onclick="simularDeepLink('${detalhes.nome}')">${resp}</span>`;
+
+    // Botão de ação para fase de gestor
+    let btnAcao = '';
+    if (faseAtual === 'APRESENTACAO_GESTOR') {
+      const concl = c.tarefasConcluidas['APRESENTACAO_GESTOR'] || [];
+      const total = FASES[2].tarefas.length;
+      const done = concl.length === total;
+      btnAcao = done
+        ? `<span class="text-xs text-emerald-600 italic">Finalizado</span>`
+        : `<button onclick="abrirModalTarefas(${c.id},'APRESENTACAO_GESTOR','gestor')" class="btn-sm"><span class="material-symbols-outlined" style="font-size:13px">edit_note</span> Gerenciar tarefas</button>`;
+    } else if (faseAtual === 'CONCLUIDO') {
+      btnAcao = `<span class="text-xs text-emerald-600 italic">—</span>`;
+    } else {
+      btnAcao = `<span class="text-xs text-slate-400 italic">Aguardando</span>`;
     }
 
-    function renderizarDashboardPedro() {
-        let pct = 15, fasesTxt = "0 de 3 fases", faseTxt = "Fase 1: Envio e Validação de Documentos com o RH";
-        if (estadoOnboarding.etapa_atual === 'ACESSOS_TI')         { pct = 50;  fasesTxt = "1 de 3 fases"; faseTxt = "Fase 2: Provisionamento de Máquina e Contas pela TI"; }
-        if (estadoOnboarding.etapa_atual === 'APRESENTACAO_GESTOR'){ pct = 85;  fasesTxt = "2 de 3 fases"; faseTxt = "Fase 3: Alinhamento de Metas e Boas-Vindas com o Gestor"; }
-        if (estadoOnboarding.etapa_atual === 'CONCLUIDO')          { pct = 100; fasesTxt = "3 de 3 fases"; faseTxt = "Onboarding concluído — você está 100% operacional!"; }
+    return `<tr class="${isAtrasado ? 'bg-red-50' : ''}">
+      <td><div class="font-semibold text-slate-900">${c.nome}</div><div class="text-xs text-slate-400">${c.cargo} · ${c.gestor}</div></td>
+      <td>${statusHtml}</td>
+      <td>${respHtml}</td>
+      <td class="text-xs text-slate-500">${c.prazo}</td>
+      <td>${btnAcao}</td>
+    </tr>`;
+  }).join('');
 
-        document.getElementById('hero-fase-txt').innerText = faseTxt;
-        document.getElementById('pizza-porcentagem').innerText = `${pct}%`;
-        document.getElementById('nav-badge-colab').innerText = `${pct}%`;
-        document.getElementById('pizza-fases-concluidas').innerText = fasesTxt;
-        document.getElementById('svg-progresso-path').setAttribute('stroke-dasharray', `${pct}, 100`);
+  container.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Colaborador</th>
+        <th>Progresso</th>
+        <th>Responsável Atual</th>
+        <th>Prazo</th>
+        <th style="text-align:center">Ação</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="text-xs text-slate-400 mt-3 px-1">Passe o mouse sobre o responsável para detalhes. Clique para simular chat no Teams. Use o botão "Gerenciar tarefas" quando a etapa for sua.</p>`;
+}
 
-        // Alerta de status
-        const alertaEl = document.getElementById('container-alerta-gargalo');
-        if (estadoOnboarding.etapa_atual !== 'CONCLUIDO') {
-            const resp = { DOCUMENTACAO_RH: 'RH', ACESSOS_TI: 'TI', APRESENTACAO_GESTOR: 'Gestor' }[estadoOnboarding.etapa_atual];
-            alertaEl.innerHTML = `
-                <div class="alert-warn flex items-start gap-3 px-5 py-4 rounded-xl">
-                    <span class="material-symbols-outlined text-amber-500 shrink-0" style="font-size:18px">schedule</span>
-                    <div>
-                        <p class="text-sm font-semibold mb-0.5">Processo em andamento</p>
-                        <p class="text-xs leading-relaxed opacity-80">
-                            Seu onboarding está sob responsabilidade do departamento de <strong>${resp}</strong>, aguardando validação na etapa <span class="font-mono font-bold">${estadoOnboarding.etapa_atual.replace('_',' ')}</span>.
-                        </p>
-                    </div>
-                </div>`;
-        } else {
-            alertaEl.innerHTML = `
-                <div class="alert-success flex items-start gap-3 px-5 py-4 rounded-xl">
-                    <span class="material-symbols-outlined text-emerald-600 shrink-0" style="font-size:18px">verified</span>
-                    <div>
-                        <p class="text-sm font-semibold mb-0.5">Integração concluída 🎉</p>
-                        <p class="text-xs opacity-80">Seu ecossistema de acesso e ferramentas está totalmente ativo. Bem-vindo à equipe!</p>
-                    </div>
-                </div>`;
-        }
+// ═══════════════════════════════════════════════════════════
+// POPUP DO RESPONSÁVEL (simulação de deep link Teams)
+// ═══════════════════════════════════════════════════════════
 
-        // Roteiro linear
-        const listaEl = document.getElementById('lista-fases-dinamica');
-        listaEl.innerHTML = '';
-        let passouAtual = false;
+function mostrarPopup(e, nome, setor, cargo) {
+  const popup = document.getElementById('resp-popup');
+  popup.innerHTML = `
+    <div class="flex items-center gap-3 mb-1">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold" style="background:#3B82F6;font-size:14px">${nome.charAt(0)}</div>
+      <div><div class="text-sm font-bold text-slate-900">${nome}</div><div class="text-xs text-slate-500">${setor} · ${cargo}</div></div>
+    </div>
+    <div class="text-xs text-slate-400 mt-1">Responsável atual pela etapa</div>
+    <div class="resp-link"><span class="material-symbols-outlined" style="font-size:15px">chat</span> Abrir chat no Teams (em breve)</div>`;
+  popup.classList.remove('hidden');
+  const rect = e.target.getBoundingClientRect();
+  let top = rect.bottom + 8;
+  let left = rect.left + (rect.width / 2) - 110;
+  if (left < 10) left = 10;
+  if (top + 150 > window.innerHeight) top = rect.top - 150;
+  popup.style.top = top + 'px';
+  popup.style.left = left + 'px';
+}
 
-        roteiroConfig.forEach((fase, idx) => {
-            const isCurrent = estadoOnboarding.etapa_atual === fase.chave;
-            const isConcluido = estadoOnboarding.etapa_atual === 'CONCLUIDO';
-            const isDone = isConcluido || (!passouAtual && !isCurrent);
-            if (isCurrent) passouAtual = true;
+function esconderPopup() { document.getElementById('resp-popup').classList.add('hidden'); }
+function simularDeepLink(nome) { alert(`[Simulação] Deep link para abrir chat no Teams com ${nome}.\nNo MVP final, esta ação abriria diretamente uma conversa no Microsoft Teams.`); esconderPopup(); }
 
-            const isLast = idx === roteiroConfig.length - 1;
+// ═══════════════════════════════════════════════════════════
+// MODAL DE TAREFAS
+// ═══════════════════════════════════════════════════════════
 
-            if (isCurrent) {
-                listaEl.innerHTML += `
-                <div class="relative flex gap-4">
-                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
-                    <div class="step-icon active shrink-0 z-10">
-                        <span class="material-symbols-outlined" style="font-size:16px">pending</span>
-                    </div>
-                    <div class="flex-1 pb-2">
-                        <div class="flex items-center justify-between mb-0.5">
-                            <h3 class="text-sm font-bold text-blue-700">${fase.titulo}</h3>
-                            <span class="chip chip-blue">Em andamento</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mb-3">${fase.desc}</p>
-                        <div class="flex flex-col gap-2.5 p-4 rounded-lg" style="background:#F8FAFC; border:1px solid var(--border)">
-                            ${fase.tarefas.map(t => `
-                                <label class="flex items-start gap-3 cursor-default">
-                                    <input type="checkbox" disabled class="mt-0.5 rounded w-4 h-4" style="border-color:#CBD5E1">
-                                    <span class="text-xs font-medium text-slate-700">${t} <span class="font-mono text-amber-600" style="font-size:10px">· aguardando aprovação</span></span>
-                                </label>`).join('')}
-                        </div>
-                    </div>
-                </div>`;
-            } else if (isDone) {
-                listaEl.innerHTML += `
-                <div class="relative flex gap-4 opacity-70">
-                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
-                    <div class="step-icon done shrink-0 z-10">
-                        <span class="material-symbols-outlined" style="font-size:16px">check</span>
-                    </div>
-                    <div class="flex-1 pb-2">
-                        <h3 class="text-sm font-bold text-emerald-700 mb-0.5">${fase.titulo}</h3>
-                        <p class="text-xs text-slate-400 mb-2">Concluída e validada pelo setor responsável.</p>
-                        <div class="flex flex-col gap-1.5">
-                            ${fase.tarefas.map(t => `
-                                <div class="flex items-center gap-2 text-xs text-slate-400 line-through">
-                                    <span class="material-symbols-outlined text-emerald-500" style="font-size:13px">done</span> ${t}
-                                </div>`).join('')}
-                        </div>
-                    </div>
-                </div>`;
-            } else {
-                listaEl.innerHTML += `
-                <div class="relative flex gap-4 opacity-35">
-                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
-                    <div class="step-icon locked shrink-0 z-10">
-                        <span class="material-symbols-outlined" style="font-size:16px">lock</span>
-                    </div>
-                    <div class="flex-1 pb-2">
-                        <h3 class="text-sm font-bold text-slate-700 mb-0.5">${fase.titulo}</h3>
-                        <p class="text-xs text-slate-400">Aguardando a conclusão das fases anteriores.</p>
-                    </div>
-                </div>`;
-            }
-        });
+function abrirModalTarefas(colaboradorId, faseChave, setor) {
+  modalCtx = { colaboradorId, faseChave, setor };
+  const colab = getColaborador(colaboradorId);
+  const fase = FASES.find(f => f.chave === faseChave);
+  const concl = colab.tarefasConcluidas[faseChave] || [];
+  document.getElementById('modal-tarefas-titulo').textContent = `${fase.titulo} — ${colab.nome}`;
+  document.getElementById('modal-tarefas-sub').textContent = fase.desc;
+  document.getElementById('modal-tarefas-hint').textContent = 'Salve o progresso parcial a qualquer momento. O colaborador verá o estado atualizado imediatamente.';
+  const lista = document.getElementById('modal-tarefas-lista');
+  lista.innerHTML = fase.tarefas.map((t, i) => `<label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors" style="border:1px solid var(--border)"><input type="checkbox" id="task-${i}" ${concl.includes(i) ? 'checked' : ''} class="w-4 h-4 rounded"><span class="text-sm font-medium text-slate-700">${t}</span></label>`).join('');
+  document.getElementById('modal-tarefas').classList.remove('hidden');
+}
+
+function salvarTarefasModal() {
+  const { colaboradorId, faseChave, setor } = modalCtx;
+  const colab = getColaborador(colaboradorId);
+  const fase = FASES.find(f => f.chave === faseChave);
+  const conclAnterior = [...(colab.tarefasConcluidas[faseChave] || [])];
+  const novasConcl = [];
+  fase.tarefas.forEach((_, i) => { if (document.getElementById(`task-${i}`)?.checked) novasConcl.push(i); });
+  colab.tarefasConcluidas[faseChave] = novasConcl;
+
+  const novasTarefas = novasConcl.filter(i => !conclAnterior.includes(i));
+  const faseConcl = faseConcluida(colab, faseChave);
+  const setorLabel = { rh:'RH', ti:'TI', gestor:'Gestor' }[setor];
+  const faseIdx = FASES.findIndex(f => f.chave === faseChave);
+
+  novasTarefas.forEach(i => {
+    const tarefa = fase.tarefas[i];
+    const isFaseConclNessa = faseConcl && i === novasTarefas[novasTarefas.length - 1];
+    emitirNotificacao({
+      icone: isFaseConclNessa ? 'check_circle' : 'task_alt',
+      cor: isFaseConclNessa ? '#10B981' : '#3B82F6',
+      bg: isFaseConclNessa ? '#D1FAE5' : '#DBEAFE',
+      titulo: isFaseConclNessa ? `${setorLabel} concluiu a fase de ${colab.nome}` : `${setorLabel} marcou tarefa como feita`,
+      desc: isFaseConclNessa ? `Todas as tarefas de ${fase.titulo.split('—')[1]?.trim() || fase.titulo} foram concluídas.` : `"${tarefa}" — ${colab.nome}`,
+      destinatario: setor,
+    });
+    if (setor !== 'gestor') {
+      emitirNotificacao({
+        icone: isFaseConclNessa ? 'check_circle' : 'task_alt',
+        cor: isFaseConclNessa ? '#10B981' : '#3B82F6',
+        bg: isFaseConclNessa ? '#D1FAE5' : '#DBEAFE',
+        titulo: isFaseConclNessa ? `${setorLabel} concluiu a fase de ${colab.nome}` : `${setorLabel} avançou em ${colab.nome}`,
+        desc: isFaseConclNessa ? `A etapa "${fase.titulo.split('—')[1]?.trim() || fase.titulo}" foi finalizada.` : `"${tarefa}" foi concluída pelo ${setorLabel}.`,
+        destinatario: 'gestor',
+      });
     }
+    emitirNotificacao({
+      icone: isFaseConclNessa ? 'check_circle' : 'task_alt',
+      cor: isFaseConclNessa ? '#10B981' : '#3B82F6',
+      bg: isFaseConclNessa ? '#D1FAE5' : '#DBEAFE',
+      titulo: isFaseConclNessa ? `${setorLabel} concluiu uma etapa do seu processo` : `${setorLabel} avançou uma tarefa do seu onboarding`,
+      desc: isFaseConclNessa ? `A etapa "${fase.titulo.split('—')[1]?.trim() || fase.titulo}" foi finalizada. ${faseIdx < FASES.length-1 ? 'Próxima etapa em breve.' : 'Seu onboarding está completo!'}` : `"${tarefa}" foi marcada como concluída pelo ${setorLabel}.`,
+      destinatario: colaboradorId,
+    });
+  });
 
-    function renderizarPainelGestao(setor) {
-        const rc = roleConfig[setor];
-        document.getElementById('titulo-fila-gestao').innerText = `Fila Operacional · ${rc.nome}`;
-        document.getElementById('desc-fila-gestao').innerText = rc.desc;
-        document.getElementById('tabela-etapa-badge').innerText = estadoOnboarding.etapa_atual;
+  if (faseConcl && faseIdx < FASES.length-1) {
+    const proximaFase = FASES[faseIdx+1];
+    const proximoSetorLabel = { rh:'RH', ti:'TI', gestor:'Gestor' }[proximaFase.setor];
+    emitirNotificacao({ icone:'forward_to_inbox', cor:'#F59E0B', bg:'#FEF3C7', titulo:`${proximoSetorLabel} — nova demanda chegou`, desc:`${colab.nome} foi liberado pelo ${setorLabel} e aguarda ação da equipe de ${proximoSetorLabel}.`, destinatario: proximaFase.setor });
+    emitirNotificacao({ icone:'forward_to_inbox', cor:'#F59E0B', bg:'#FEF3C7', titulo:`${proximoSetorLabel} — ${colab.nome} aguardando`, desc:`${colab.nome} foi liberado pelo ${setorLabel}. Próxima etapa: ${proximoSetorLabel}.`, destinatario:'gestor' });
+    colab.turnoNotificado[proximaFase.setor] = true;
+  }
 
-        const respMap = { DOCUMENTACAO_RH: 'RH', ACESSOS_TI: 'TI', APRESENTACAO_GESTOR: 'Gestor', CONCLUIDO: '—' };
-        document.getElementById('tabela-setor-responsavel').innerText = respMap[estadoOnboarding.etapa_atual] || '—';
+  if (faseConcl) colab.atrasoNotificado[faseChave] = false;
 
-        const estadoBadge    = document.getElementById('tabela-estado-badge');
-        const containerBotao = document.getElementById('container-botao-acao-gestao');
-        const checklist      = document.getElementById('checklist-demandas-setor');
+  fecharModalTarefas();
+  if (setor === 'rh') renderizarTabelaRH();
+  else if (setor === 'ti') renderizarTabelaTI();
+  else if (setor === 'gestor') renderizarTabelaGestor();
+  renderizarWorkerList();
+  atualizarBadgesSidebar();
+}
 
-        const chaveMap = { rh: 'DOCUMENTACAO_RH', ti: 'ACESSOS_TI', gestor: 'APRESENTACAO_GESTOR' };
-        const pertence = estadoOnboarding.etapa_atual === chaveMap[setor];
+function fecharModalTarefas() { document.getElementById('modal-tarefas').classList.add('hidden'); modalCtx = {}; }
+function fecharModalTarefasSeFora(e) { if (e.target === document.getElementById('modal-tarefas')) fecharModalTarefas(); }
 
-        if (estadoOnboarding.etapa_atual === 'CONCLUIDO') {
-            estadoBadge.innerHTML    = `<span class="chip chip-green">✅ Concluído</span>`;
-            containerBotao.innerHTML = `<span class="text-xs text-emerald-600 font-medium italic">Processo finalizado</span>`;
-            checklist.innerHTML      = `<p class="text-xs text-slate-400 col-span-2">Nenhuma demanda ativa. Pedro Alencar está integrado.</p>`;
-            return;
-        }
+// ═══════════════════════════════════════════════════════════
+// MODAL NOVO COLABORADOR
+// ═══════════════════════════════════════════════════════════
 
-        if (pertence) {
-            estadoBadge.innerHTML = `<span class="chip chip-amber" style="animation: ping-slow 2s ease-in-out infinite">⏳ Suas demandas</span>`;
+function abrirModalNovoColaborador() { document.getElementById('input-nome').value = ''; document.getElementById('input-cargo').value = ''; document.getElementById('modal').classList.remove('hidden'); setTimeout(() => document.getElementById('input-nome').focus(), 100); }
+function fecharModal() { document.getElementById('modal').classList.add('hidden'); }
+function fecharModalSeFora(e) { if (e.target === document.getElementById('modal')) fecharModal(); }
 
-            const txtBotao = setor === 'rh' ? 'Aprovar e Acionar TI'
-                           : setor === 'ti' ? 'Finalizar e Liberar para Gestor'
-                           : 'Validar Check-in e Concluir';
+function cadastrarColaborador() {
+  const nome = document.getElementById('input-nome').value.trim();
+  const cargo = document.getElementById('input-cargo').value.trim();
+  const gestor = document.getElementById('input-gestor').value;
+  if (!nome || !cargo) { document.getElementById('input-nome').style.borderColor = nome ? '' : '#EF4444'; document.getElementById('input-cargo').style.borderColor = cargo ? '' : '#EF4444'; return; }
+  const hoje = new Date();
+  const prazo = new Date(hoje.getTime() + 7*24*60*60*1000);
+  const prazoFmt = prazo.toLocaleDateString('pt-BR');
+  const novoColab = {
+    id: nextId++, nome, cargo, gestor,
+    tarefasConcluidas: { DOCUMENTACAO_RH: [], ACESSOS_TI: [], APRESENTACAO_GESTOR: [] },
+    prazo: prazoFmt,
+    atrasoNotificado: { DOCUMENTACAO_RH: false, ACESSOS_TI: false, APRESENTACAO_GESTOR: false },
+    turnoNotificado: { rh: false, ti: false, gestor: false }
+  };
+  colaboradores.push(novoColab);
+  fecharModal();
+  emitirNotificacao({ icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:`Novo colaborador cadastrado`, desc:`${nome} (${cargo}) entrou na fila do RH. Prazo: ${prazoFmt}.`, destinatario:'rh' });
+  emitirNotificacao({ icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:`Novo colaborador: ${nome}`, desc:`${cargo} — gestor ${gestor}. Acaba de entrar no fluxo de onboarding.`, destinatario:'gestor' });
+  renderizarTabelaRH();
+  renderizarWorkerList();
+  atualizarBadgesSidebar();
+}
 
-            containerBotao.innerHTML = `
-                <button onclick="executarTransicaoAvanco('${setor}')" class="btn-primary">
-                    <span class="material-symbols-outlined" style="font-size:15px">check_circle</span>
-                    ${txtBotao}
-                </button>`;
+// ═══════════════════════════════════════════════════════════
+// VERIFICAÇÃO DE ATRASOS
+// ═══════════════════════════════════════════════════════════
 
-            const fase = roteiroConfig.find(f => f.chave === estadoOnboarding.etapa_atual);
-            checklist.innerHTML = fase.tarefas.map(t => `
-                <div class="flex items-center gap-3 p-3 rounded-lg bg-white" style="border:1px solid var(--border)">
-                    <input type="checkbox" checked class="rounded w-4 h-4" style="accent-color:#3B82F6">
-                    <span class="text-xs font-medium text-slate-700">${t}</span>
-                </div>`).join('');
-        } else {
-            estadoBadge.innerHTML    = `<span class="chip chip-slate">🔒 Bloqueado</span>`;
-            containerBotao.innerHTML = `<span class="text-xs text-slate-400 italic">Aguardando setores anteriores</span>`;
-            checklist.innerHTML      = `<p class="text-xs text-slate-400 col-span-2">O processo de Pedro Alencar está atualmente na mesa do <strong>${document.getElementById('tabela-setor-responsavel').innerText}</strong>.</p>`;
-        }
+function verificarAtrasosSetor(setor) {
+  const faseDoSetor = FASES.find(f => f.setor === setor);
+  if (!faseDoSetor) return;
+  const colaboradoresNoSetor = colaboradores.filter(c => {
+    if (setor === 'rh') return true;
+    else if (setor === 'ti') return faseConcluida(c, 'DOCUMENTACAO_RH');
+    else if (setor === 'gestor') return true;
+    return false;
+  });
+  colaboradoresNoSetor.forEach(c => {
+    const concl = c.tarefasConcluidas[faseDoSetor.chave] || [];
+    const total = faseDoSetor.tarefas.length;
+    const done = concl.length === total;
+    const atrasoDias = diasAtraso(c, faseDoSetor.chave);
+    if (!done && atrasoDias > 0 && !c.atrasoNotificado[faseDoSetor.chave]) {
+      const setorLabel = { rh:'RH', ti:'TI', gestor:'Gestor' }[setor];
+      emitirNotificacao({ icone:'warning', cor:'#EF4444', bg:'#FEE2E2', titulo:`Atraso: ${c.nome}`, desc:`${setorLabel} está há ${atrasoDias} dia(s) além do prazo (${c.prazo}).`, destinatario: setor });
+      if (setor !== 'gestor') emitirNotificacao({ icone:'warning', cor:'#EF4444', bg:'#FEE2E2', titulo:`Atraso em ${setorLabel}: ${c.nome}`, desc:`O setor de ${setorLabel} está com ${atrasoDias} dia(s) de atraso em relação ao prazo (${c.prazo}).`, destinatario:'gestor' });
+      c.atrasoNotificado[faseDoSetor.chave] = true;
     }
+  });
+}
 
-    function executarTransicaoAvanco(setor) {
-        if (setor === 'rh') {
-            estadoOnboarding.etapa_atual = 'ACESSOS_TI';
-            document.getElementById('notif-aba-ti').classList.remove('hidden');
-            alternarSessaoSimulada('ti');
-        } else if (setor === 'ti') {
-            estadoOnboarding.etapa_atual = 'APRESENTACAO_GESTOR';
-            document.getElementById('notif-aba-gestor').classList.remove('hidden');
-            alternarSessaoSimulada('gestor');
-        } else if (setor === 'gestor') {
-            estadoOnboarding.etapa_atual = 'CONCLUIDO';
-            alternarSessaoSimulada('colaborador');
-        }
-    }
+// ═══════════════════════════════════════════════════════════
+// SISTEMA DE NOTIFICAÇÕES
+// ═══════════════════════════════════════════════════════════
 
-    window.onload = () => renderizarDashboardPedro();
+let notificacoes = [];
+let notifDropdownAberto = false;
+
+function emitirNotificacao({ titulo, desc, icone, cor, bg, destinatario }) {
+  notificacoes.unshift({ id: Date.now() + Math.random(), lida: false, titulo, desc, icone, cor, bg, destinatario, ts: new Date() });
+  renderizarNotificacoes();
+  animarSino();
+}
+
+function notificacoesVisiveis() {
+  if (sessaoAtiva === 'colaborador') return notificacoes.filter(n => n.destinatario === colaboradorSelecionadoId);
+  if (sessaoAtiva === 'gestor') return notificacoes.filter(n => n.destinatario === 'gestor' || n.destinatario === 'rh' || n.destinatario === 'ti');
+  return notificacoes.filter(n => n.destinatario === sessaoAtiva);
+}
+
+function animarSino() { const el = document.getElementById('notif-bell-icon'); el.classList.remove('bell-ring'); void el.offsetWidth; el.classList.add('bell-ring'); setTimeout(() => el.classList.remove('bell-ring'), 600); }
+
+function renderizarNotificacoes() {
+  const visiveis = notificacoesVisiveis();
+  const naoLidas = visiveis.filter(n => !n.lida).length;
+  const badge = document.getElementById('notif-bell-badge');
+  if (naoLidas > 0) { badge.textContent = naoLidas > 9 ? '9+' : naoLidas; badge.classList.remove('hidden'); }
+  else { badge.classList.add('hidden'); }
+  const lista = document.getElementById('notif-lista');
+  if (!visiveis.length) { lista.innerHTML = `<div class="flex flex-col items-center justify-center py-10 gap-2"><span class="material-symbols-outlined text-slate-300" style="font-size:36px">notifications_off</span><p class="text-xs text-slate-400">Nenhuma notificação ainda.</p></div>`; return; }
+  lista.innerHTML = visiveis.map(n => {
+    const mins = Math.floor((Date.now() - n.ts) / 60000);
+    const tempo = mins < 1 ? 'agora mesmo' : mins < 60 ? `${mins}m atrás` : `${Math.floor(mins/60)}h atrás`;
+    return `<div class="notif-item ${n.lida ? '' : 'unread'}" onclick="marcarLida('${n.id}')"><div class="notif-icon" style="background:${n.bg}"><span class="material-symbols-outlined" style="font-size:17px;color:${n.cor}">${n.icone}</span></div><div class="flex-1 min-w-0"><p class="text-xs font-semibold text-slate-900 leading-snug mb-0.5">${n.titulo}${!n.lida ? ' <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3B82F6;margin-left:3px;vertical-align:middle"></span>' : ''}</p><p class="text-xs text-slate-500 leading-relaxed">${n.desc}</p><span class="notif-time mt-1 block">${tempo}</span></div></div>`;
+  }).join('');
+}
+
+function marcarLida(id) { const n = notificacoes.find(n => String(n.id) === String(id)); if (n) n.lida = true; renderizarNotificacoes(); }
+function marcarTodasLidas() { notificacoes.forEach(n => n.lida = true); renderizarNotificacoes(); }
+
+function toggleNotifDropdown() {
+  const dd = document.getElementById('notif-dropdown');
+  notifDropdownAberto = !notifDropdownAberto;
+  if (notifDropdownAberto) { dd.classList.remove('hidden'); renderizarNotificacoes(); setTimeout(() => document.addEventListener('click', fecharNotifFora), 50); }
+  else { dd.classList.add('hidden'); document.removeEventListener('click', fecharNotifFora); }
+}
+function fecharNotifFora(e) { if (!document.getElementById('notif-wrapper').contains(e.target)) { document.getElementById('notif-dropdown').classList.add('hidden'); notifDropdownAberto = false; document.removeEventListener('click', fecharNotifFora); } }
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
+window.onload = function() {
+  renderizarWorkerList();
+  renderizarDashboardColaborador();
+  atualizarBadgesSidebar();
+  document.getElementById('sidebar-worker-list').style.display = '';
+
+  const seed = [
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Pedro Alencar foi cadastrado pelo RH', desc:'Engenheiro de Software entrou na fila de documentação.', atraso:12, destinatario:'rh', lida:true },
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Camila Torres foi cadastrada pelo RH', desc:'UX Designer entrou na fila de documentação.', atraso:10, destinatario:'rh', lida:true },
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Rafael Martins foi cadastrado pelo RH', desc:'Designer Gráfico entrou na fila de documentação.', atraso:15, destinatario:'rh', lida:true },
+    { icone:'task_alt', cor:'#3B82F6', bg:'#DBEAFE', titulo:'RH marcou tarefa como feita', desc:'"Assinatura do Contrato de Trabalho Digital" — Camila Torres', atraso:8, destinatario:'rh', lida:true },
+    { icone:'task_alt', cor:'#3B82F6', bg:'#DBEAFE', titulo:'RH marcou tarefa como feita', desc:'"Envio de Documentos de Identificação (RG/CPF)" — Camila Torres', atraso:6, destinatario:'rh', lida:false },
+    { icone:'check_circle', cor:'#10B981', bg:'#D1FAE5', titulo:'RH concluiu a fase de Camila Torres', desc:'Todas as tarefas de Documentação com o RH foram concluídas.', atraso:5, destinatario:'rh', lida:false },
+    { icone:'forward_to_inbox', cor:'#F59E0B', bg:'#FEF3C7', titulo:'TI — nova demanda chegou', desc:'Camila Torres foi liberada pelo RH e aguarda ação da equipe de TI.', atraso:5, destinatario:'ti', lida:false },
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Novo colaborador: Pedro Alencar', desc:'Engenheiro de Software — gestor Carlos Mendes.', atraso:12, destinatario:'gestor', lida:true },
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Novo colaborador: Camila Torres', desc:'UX Designer — gestor Fernanda Alves.', atraso:10, destinatario:'gestor', lida:true },
+    { icone:'person_add', cor:'#8B5CF6', bg:'#EDE9FE', titulo:'Novo colaborador: Rafael Martins', desc:'Designer Gráfico — gestor Rafael Souza.', atraso:15, destinatario:'gestor', lida:true },
+    { icone:'task_alt', cor:'#3B82F6', bg:'#DBEAFE', titulo:'RH avançou em Camila Torres', desc:'"Assinatura do Contrato..." foi concluída pelo RH.', atraso:8, destinatario:'gestor', lida:true },
+    { icone:'task_alt', cor:'#3B82F6', bg:'#DBEAFE', titulo:'RH avançou em Camila Torres', desc:'"Envio de Documentos..." foi concluída pelo RH.', atraso:6, destinatario:'gestor', lida:false },
+    { icone:'check_circle', cor:'#10B981', bg:'#D1FAE5', titulo:'RH concluiu a fase de Camila Torres', desc:'Etapa "Documentação com o RH" finalizada.', atraso:5, destinatario:'gestor', lida:false },
+    { icone:'forward_to_inbox', cor:'#F59E0B', bg:'#FEF3C7', titulo:'TI — Camila Torres aguardando', desc:'Camila Torres foi liberada pelo RH. Próxima etapa: TI.', atraso:5, destinatario:'gestor', lida:false },
+    { icone:'warning', cor:'#EF4444', bg:'#FEE2E2', titulo:'Atraso em RH: Rafael Martins', desc:'O setor de RH está com 2 dia(s) de atraso em relação ao prazo (19/05/2026).', atraso:2, destinatario:'gestor', lida:false },
+    { icone:'warning', cor:'#EF4444', bg:'#FEE2E2', titulo:'Atraso: Rafael Martins', desc:'RH está há 2 dia(s) além do prazo (19/05/2026).', atraso:2, destinatario:'rh', lida:false },
+    { icone:'schedule', cor:'#3B82F6', bg:'#DBEAFE', titulo:'Seu onboarding foi iniciado', desc:'Bem-vindo, Pedro! O RH já recebeu sua documentação.', atraso:11, destinatario:1, lida:true },
+  ];
+
+  seed.reverse().forEach((s, idx) => {
+    notificacoes.push({
+      id: Date.now() - (seed.length - idx) * 1000,
+      lida: s.lida, titulo: s.titulo, desc: s.desc,
+      icone: s.icone, cor: s.cor, bg: s.bg,
+      destinatario: s.destinatario,
+      ts: new Date(Date.now() - s.atraso * 60000)
+    });
+  });
+
+  // Evita duplicação de notificações de atraso do Rafael já que o seed contém esses avisos
+  const rafael = colaboradores.find(c => c.nome === 'Rafael Martins');
+  if (rafael) rafael.atrasoNotificado.DOCUMENTACAO_RH = true;
+
+  renderizarNotificacoes();
+};
 </script>
 </body>
 </html>
