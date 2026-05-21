@@ -3,268 +3,341 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>StepUp - Painel Integrado de Simulação (MVP)</title>
+    <title>StepUp — Simulação de Fluxo MVP</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Hanken Grotesk', sans-serif; }
-        @keyframes pulse-red {
+        :root {
+            --navy: #0A1628;
+            --navy-mid: #132040;
+            --navy-border: rgba(255,255,255,0.08);
+            --accent: #3B82F6;
+            --accent-glow: rgba(59,130,246,0.15);
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --surface: #F8FAFC;
+            --card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text-primary); }
+        .font-mono { font-family: 'DM Mono', monospace; }
+
+        /* Sidebar */
+        .sidebar { background: var(--navy); width: 280px; }
+
+        /* Devtools badge no topo da sidebar */
+        .devmode-banner {
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 6px,
+                rgba(251,191,36,0.08) 6px,
+                rgba(251,191,36,0.08) 12px
+            );
+            border-bottom: 1px solid rgba(251,191,36,0.25);
+        }
+
+        /* Role buttons */
+        .role-btn { transition: all 0.15s ease; }
+        .role-btn.active { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.45); color: #fff; }
+        .role-btn:not(.active):hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); }
+
+        /* Ping dot */
+        @keyframes ping-slow {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.95; }
+            50% { transform: scale(1.5); opacity: 0.5; }
         }
-        .animate-pulse-red { animation: pulse-red 2s infinite; }
-        
-        /* Notificação lateral piscante para indicar ação reativa */
-        @keyframes indicator-glow {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.3); opacity: 1; }
-        }
-        .ping-alert { animation: indicator-glow 1.5s infinite; }
+        .ping-dot { animation: ping-slow 1.5s ease-in-out infinite; }
+
+        /* Progress ring */
+        .ring-path { transition: stroke-dasharray 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Cards */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+        .card-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+        /* Status chips */
+        .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+        .chip-amber { background: #FEF3C7; color: #92400E; }
+        .chip-blue  { background: #DBEAFE; color: #1E40AF; }
+        .chip-green { background: #D1FAE5; color: #065F46; }
+        .chip-slate { background: #F1F5F9; color: #64748B; }
+
+        /* Step indicators */
+        .step-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+        .step-icon.active  { background: #1D4ED8; color: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.2), 0 1px 4px rgba(0,0,0,0.12); }
+        .step-icon.done    { background: var(--success); color: #fff; }
+        .step-icon.locked  { background: #E2E8F0; color: #94A3B8; }
+
+        /* Table */
+        table { border-collapse: collapse; width: 100%; }
+        th { background: #F8FAFC; color: var(--text-secondary); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 16px; border-bottom: 1px solid #F1F5F9; font-size: 13px; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #FAFBFF; }
+
+        /* Buttons */
+        .btn-primary { background: #1D4ED8; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s; border: none; }
+        .btn-primary:hover { background: #1E40AF; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.3); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* Header breadcrumb */
+        .breadcrumb-tag { background: #EFF6FF; color: #1D4ED8; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        /* Alert strip */
+        .alert-info  { background: #EFF6FF; border-left: 3px solid #3B82F6; color: #1E3A5F; }
+        .alert-warn  { background: #FFFBEB; border-left: 3px solid #F59E0B; color: #78350F; }
+        .alert-success { background: #ECFDF5; border-left: 3px solid #10B981; color: #064E3B; }
+
+        /* Separator */
+        .phase-connector { position: absolute; left: 18px; top: 38px; width: 1px; height: calc(100% + 24px); background: linear-gradient(to bottom, #CBD5E1, transparent); z-index: 0; }
     </style>
-    <script id="tailwind-config">
-      tailwind.config = {
-        theme: {
-          extend: {
-            "colors": {
-                "surface-tint": "#00687c",
-                "deep-navy": "#0F172A",
-                "tertiary-container": "#6c748b",
-                "secondary-fixed": "#66f7ff",
-                "surface-container-low": "#f2f4f6",
-                "outline": "#6f797c",
-                "surface-variant": "#e0e3e5",
-                "background": "#f7f9fb",
-                "slate-gray": "#64748B",
-                "secondary": "#00696e",
-                "primary": "#006579",
-                "primary-container": "#197f96",
-                "success": "#10B981",
-                "error": "#E11D48",
-                "lime-accent": "#00D3DC",
-                "surface-container-lowest": "#ffffff",
-                "surface": "#f7f9fb"
-            },
-            "borderRadius": {
-                "DEFAULT": "0.125rem",
-                "lg": "0.25rem",
-                "xl": "0.5rem",
-                "full": "0.75rem"
-            },
-            "spacing": {
-                "margin-mobile": "16px",
-                "gutter": "24px",
-                "base": "8px",
-                "margin-desktop": "40px",
-                "container-max": "1440px"
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['DM Sans', 'sans-serif'], mono: ['DM Mono', 'monospace'] }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
-<body class="bg-background text-on-background min-h-screen flex">
+<body class="flex min-h-screen">
 
-<nav class="hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-slate-200 bg-deep-navy w-72 z-50">
-    <div class="flex items-center px-6 py-6 border-b border-white/10">
-        <span class="font-display-lg text-2xl text-lime-accent font-black tracking-wider flex items-center gap-2">
-            <span class="material-symbols-outlined">rocket_launch</span> StepUp
-        </span>
-    </div>
-    
-    <div class="p-4 border-b border-white/10 bg-slate-900/50">
-        <div class="px-2 py-1 text-[10px] font-bold text-lime-accent uppercase tracking-wider mb-2 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-lime-accent animate-ping"></span> Módulo Sandbox de Simulação
+<!-- ═══════════════════════════════════════════════════════ SIDEBAR ═══ -->
+<nav class="sidebar hidden md:flex fixed left-0 top-0 h-screen flex-col z-50" style="width:280px">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-2.5 px-5 py-5" style="border-bottom: 1px solid var(--navy-border)">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--accent)">
+            <span class="material-symbols-outlined text-white text-base">rocket_launch</span>
         </div>
-        <p class="text-[11px] text-slate-400 px-2 mb-3">Clique nas perspectivas abaixo para simular o fluxo sem deslogar.</p>
-        
-        <div class="space-y-2">
-            <button onclick="alternarSessaoSimulada('colaborador')" id="nav-btn-colaborador" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-primary-container text-white text-xs font-semibold transition-all">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">person</span>
-                    <span>Pedro Alencar (Candidato)</span>
-                </div>
-                <span id="nav-badge-colab" class="text-[9px] bg-white/20 px-1.5 py-0.5 rounded">15%</span>
-            </button>
-
-            <button onclick="alternarSessaoSimulada('rh')" id="nav-btn-rh" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white text-xs font-semibold transition-all">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">badge</span>
-                    <span>Mariana Costa (RH)</span>
-                </div>
-                <span id="notif-aba-rh" class="hidden w-2 h-2 rounded-full bg-amber-500 ping-alert"></span>
-            </button>
-
-            <button onclick="alternarSessaoSimulada('ti')" id="nav-btn-ti" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white text-xs font-semibold transition-all">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">desktop_mac</span>
-                    <span>Lucas Rezende (TI)</span>
-                </div>
-                <span id="notif-aba-ti" class="hidden w-2 h-2 rounded-full bg-error ping-alert"></span>
-            </button>
-
-            <button onclick="alternarSessaoSimulada('gestor')" id="nav-btn-gestor" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white text-xs font-semibold transition-all">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">supervisor_account</span>
-                    <span>Carlos Mendes (Gestor)</span>
-                </div>
-                <span id="notif-aba-gestor" class="hidden w-2 h-2 rounded-full bg-primary-container ping-alert"></span>
-            </button>
-        </div>
+        <span class="text-white font-bold text-lg tracking-tight">StepUp</span>
+        <span class="ml-auto text-xs font-mono px-1.5 py-0.5 rounded" style="background: rgba(59,130,246,0.2); color: #93C5FD">MVP</span>
     </div>
 
-    <div class="flex flex-col gap-2 px-4 py-4 mt-auto border-t border-white/10">
-        <div class="px-4 py-1 text-xs font-bold text-slate-gray uppercase tracking-wider">Foco de Tela Ativo</div>
-        <div class="flex items-center gap-2 px-4 py-2 text-white text-xs bg-white/5 rounded border border-white/10">
-            <span class="material-symbols-outlined text-sm text-lime-accent" id="nav-role-icon">person</span>
-            <span id="nav-role-name" class="font-mono font-bold uppercase">COLABORADOR</span>
+    <!-- Dev Mode Banner -->
+    <div class="devmode-banner px-5 py-3">
+        <div class="flex items-center gap-2 mb-1.5">
+            <span class="material-symbols-outlined text-amber-400" style="font-size:15px">construction</span>
+            <span class="text-amber-400 font-bold text-xs tracking-widest uppercase">Painel de Simulação</span>
         </div>
-        <div class="p-2 bg-slate-950/60 rounded border border-slate-800 text-[11px] text-slate-400">
-            <span class="font-bold text-white block mb-0.5">Logs de Eventos:</span>
-            <p id="simulador-log-texto">Painel iniciado em modo de testes.</p>
+        <p class="text-xs leading-relaxed" style="color: rgba(255,255,255,0.45)">
+            Este painel não representa a interface final do usuário. Ele simula múltiplas perspectivas do fluxo em uma única tela, para fins de demonstração do MVP.
+        </p>
+    </div>
+
+    <!-- Perspectivas -->
+    <div class="px-4 py-4 flex flex-col gap-1" style="border-bottom: 1px solid var(--navy-border)">
+        <p class="text-xs font-semibold mb-2 px-1" style="color: rgba(255,255,255,0.35); letter-spacing:0.08em; text-transform:uppercase">Perspectivas do fluxo</p>
+
+        <button onclick="alternarSessaoSimulada('colaborador')" id="nav-btn-colaborador"
+            class="role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-white text-xs font-medium">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-sm" style="opacity:0.8">person</span>
+                <div class="text-left">
+                    <div class="font-semibold">Pedro Alencar</div>
+                    <div style="color:rgba(255,255,255,0.4); font-size:10px">Candidato em onboarding</div>
+                </div>
+            </div>
+            <span id="nav-badge-colab" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:rgba(59,130,246,0.25); color: #93C5FD">15%</span>
+        </button>
+
+        <button onclick="alternarSessaoSimulada('rh')" id="nav-btn-rh"
+            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-sm">badge</span>
+                <div class="text-left">
+                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Mariana Costa</div>
+                    <div style="color:rgba(255,255,255,0.35); font-size:10px">RH — Contratos e Documentação</div>
+                </div>
+            </div>
+            <span id="notif-aba-rh" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#F59E0B"></span>
+        </button>
+
+        <button onclick="alternarSessaoSimulada('ti')" id="nav-btn-ti"
+            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-sm">desktop_mac</span>
+                <div class="text-left">
+                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Lucas Rezende</div>
+                    <div style="color:rgba(255,255,255,0.35); font-size:10px">TI — Infraestrutura e Acessos</div>
+                </div>
+            </div>
+            <span id="notif-aba-ti" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#EF4444"></span>
+        </button>
+
+        <button onclick="alternarSessaoSimulada('gestor')" id="nav-btn-gestor"
+            class="role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium" style="color: rgba(255,255,255,0.5)">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-sm">supervisor_account</span>
+                <div class="text-left">
+                    <div class="font-semibold" style="color:rgba(255,255,255,0.75)">Carlos Mendes</div>
+                    <div style="color:rgba(255,255,255,0.35); font-size:10px">Gestor — Engenharia</div>
+                </div>
+            </div>
+            <span id="notif-aba-gestor" class="hidden w-2 h-2 rounded-full ping-dot" style="background:#3B82F6"></span>
+        </button>
+    </div>
+
+    <!-- Context footer -->
+    <div class="px-4 py-4 mt-auto">
+        <div class="rounded-lg p-3 flex items-center gap-3" style="background: rgba(255,255,255,0.04); border: 1px solid var(--navy-border)">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background: rgba(59,130,246,0.2)">
+                <span class="material-symbols-outlined text-blue-400" style="font-size:14px" id="nav-role-icon">person</span>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-white" id="nav-role-name">Pedro Alencar</div>
+                <div class="font-mono" style="font-size:9px; color: rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.08em" id="nav-role-label">Colaborador</div>
+            </div>
         </div>
     </div>
 </nav>
 
-<main class="flex-1 md:ml-72 flex flex-col min-h-screen bg-surface">
-    
-    <header class="flex justify-between items-center px-6 md:px-10 h-16 w-full sticky top-0 z-40 bg-surface-container-lowest border-b border-slate-200">
-        <div class="flex items-center gap-4">
-            <span class="font-semibold text-xs uppercase tracking-wider text-primary">Modo Demonstração Interativo</span>
-            <span class="material-symbols-outlined text-sm text-slate-gray">chevron_right</span>
-            <span id="header-caminho-contexto" class="text-xs font-semibold text-slate-gray">Dashboard Pessoal do Candidato</span>
+<!-- ═══════════════════════════════════════════════════════ MAIN ═══ -->
+<main class="flex-1 flex flex-col min-h-screen" style="margin-left:280px">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 flex items-center justify-between px-8 h-14" style="background:#fff; border-bottom: 1px solid var(--border)">
+        <div class="flex items-center gap-2.5">
+            <span class="breadcrumb-tag">Demo Interativo</span>
+            <span class="material-symbols-outlined text-slate-300" style="font-size:14px">chevron_right</span>
+            <span class="text-xs font-medium text-slate-500" id="header-caminho-contexto">Dashboard do Candidato</span>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200" id="badge-perfil-contexto">Pedro Alencar</span>
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background: #F1F5F9; color: #475569" id="badge-perfil-contexto">Pedro Alencar</span>
         </div>
     </header>
 
-    <div class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full flex flex-col gap-6">
-        
-        <div class="bg-blue-50 border-l-4 border-primary-container p-4 rounded-r-xl shadow-sm flex gap-3 items-start">
-            <span class="material-symbols-outlined text-primary-container">info</span>
-            <div>
-                <h4 class="font-bold text-sm text-deep-navy">Ambiente Sandbox Integrado</h4>
-                <p class="text-xs text-slate-gray mt-0.5 leading-relaxed">
-                    Este ambiente unifica as duas pontas do sistema para testes de fluxo. Ao aprovar as demandas em um setor, o sistema gera o alerta reativo e atualiza em tempo real o roteiro do Pedro.
-                </p>
-            </div>
-        </div>
+    <!-- Body -->
+    <div class="flex-1 p-8 flex flex-col gap-6 max-w-5xl w-full mx-auto">
 
-        <div id="visao-painel-colaborador" class="space-y-6">
-            <section class="bg-white rounded-xl border border-slate-200 p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-sm">
-                <div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-primary-container/10 to-transparent pointer-events-none"></div>
-                <div class="flex flex-col gap-2 z-10">
-                    <h1 class="text-3xl md:text-4xl text-deep-navy font-bold">Seja bem-vindo, Pedro Alencar!</h1>
-                    <p class="text-base text-slate-gray">Seu progresso atual: <span class="font-bold text-primary-container" id="hero-fase-txt">Fase 1: Envio e Validação de Documentos com o RH</span></p>
+        <!-- ─── Visão: Colaborador ─── -->
+        <div id="visao-painel-colaborador" class="flex flex-col gap-6">
+
+            <!-- Hero card -->
+            <div class="card-section p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-56 h-full pointer-events-none" style="background: linear-gradient(to left, rgba(59,130,246,0.05), transparent)"></div>
+                <div class="z-10">
+                    <h1 class="text-2xl font-bold text-slate-900 mb-1">Olá, Pedro Alencar 👋</h1>
+                    <p class="text-sm text-slate-500" id="hero-fase-txt">Fase 1: Envio e Validação de Documentos com o RH</p>
                 </div>
-                <div class="z-10 bg-surface-container-low rounded-lg px-6 py-4 border border-outline-variant flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-full border-4 border-surface bg-white flex items-center justify-center relative shadow-sm">
-                        <svg class="w-full h-full -rotate-90 absolute" viewBox="0 0 36 36">
-                            <path class="text-slate-200 stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
-                            <path id="svg-progresso-path" class="text-lime-accent stroke-current transition-all duration-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="15, 100" stroke-linecap="round" stroke-width="3"></path>
+                <div class="z-10 flex items-center gap-4 shrink-0 card px-5 py-4">
+                    <div class="relative w-14 h-14">
+                        <svg class="w-full h-full -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+                            <path stroke="#E2E8F0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+                            <path id="svg-progresso-path" class="ring-path" stroke="#3B82F6" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="15, 100" stroke-linecap="round" stroke-width="3"></path>
                         </svg>
-                        <span class="text-base font-bold text-deep-navy" id="pizza-porcentagem">15%</span>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-sm font-bold text-slate-800" id="pizza-porcentagem">15%</span>
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-xs text-slate-gray uppercase tracking-wider font-bold">Conclusão</span>
-                        <span class="text-sm text-on-surface font-semibold" id="pizza-fases-concluidas">0 de 3 Fases</span>
+                    <div>
+                        <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-0.5">Conclusão</div>
+                        <div class="text-sm font-semibold text-slate-800" id="pizza-fases-concluidas">0 de 3 fases</div>
                     </div>
                 </div>
-            </section>
+            </div>
 
+            <!-- Alert gargalo -->
             <div id="container-alerta-gargalo"></div>
 
+            <!-- Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <section class="lg:col-span-8 bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-6 shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <h2 class="text-xl font-bold text-deep-navy">Seu Roteiro de Integração</h2>
+                <!-- Roteiro -->
+                <div class="lg:col-span-8 card-section p-6 flex flex-col gap-5">
+                    <div style="border-bottom: 1px solid var(--border)" class="pb-4">
+                        <h2 class="text-base font-bold text-slate-900">Roteiro de Integração</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Etapas do seu processo de onboarding</p>
                     </div>
-                    <div class="relative flex flex-col gap-8 py-4" id="lista-fases-dinamica"></div>
-                </section>
+                    <div class="flex flex-col gap-7 py-2" id="lista-fases-dinamica"></div>
+                </div>
 
-                <section class="lg:col-span-4 flex flex-col gap-6">
-                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
-                        <div class="flex items-center gap-2 border-b border-slate-100 pb-4">
-                            <span class="material-symbols-outlined text-primary">diversity_3</span>
-                            <h2 class="text-lg font-bold text-deep-navy">Rede de Apoio SBK</h2>
+                <!-- Rede de apoio -->
+                <div class="lg:col-span-4 card-section p-6 flex flex-col gap-4">
+                    <div style="border-bottom: 1px solid var(--border)" class="pb-4">
+                        <h2 class="text-base font-bold text-slate-900">Rede de Apoio</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Seus pontos de contato</p>
+                    </div>
+                    <div class="flex flex-col gap-2.5 pt-1">
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-blue-600" style="background:#DBEAFE">
+                                <span class="material-symbols-outlined text-lg">badge</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Mariana Costa</div>
+                                <div class="text-xs text-slate-400">RH · Contratos</div>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-3 pt-2">
-                            <div class="flex items-center gap-4 p-3 rounded-lg bg-surface-container-low border border-slate-100">
-                                <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-xl">badge</span></div>
-                                <div class="flex flex-col flex-1">
-                                    <span class="text-sm font-semibold text-deep-navy">Mariana Costa</span>
-                                    <span class="text-xs text-slate-gray">Ponto Focal - RH / Contratos</span>
-                                </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-violet-600" style="background:#EDE9FE">
+                                <span class="material-symbols-outlined text-lg">desktop_mac</span>
                             </div>
-                            <div class="flex items-center gap-4 p-3 rounded-lg bg-surface-container-low border border-slate-100">
-                                <div class="w-10 h-10 rounded bg-secondary/10 flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-xl">desktop_mac</span></div>
-                                <div class="flex flex-col flex-1">
-                                    <span class="text-sm font-semibold text-deep-navy">Lucas Rezende</span>
-                                    <span class="text-xs text-slate-gray">Infraestrutura - TI / Acessos</span>
-                                </div>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Lucas Rezende</div>
+                                <div class="text-xs text-slate-400">TI · Infraestrutura</div>
                             </div>
-                            <div class="flex items-center gap-4 p-3 rounded-lg bg-surface-container-low border border-slate-100">
-                                <div class="w-10 h-10 rounded bg-amber-100 text-amber-800 flex items-center justify-center"><span class="material-symbols-outlined text-xl">supervisor_account</span></div>
-                                <div class="flex flex-col flex-1">
-                                    <span class="text-sm font-semibold text-deep-navy">Carlos Mendes</span>
-                                    <span class="text-xs text-slate-gray">Gestor Direto - Engenharia</span>
-                                </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#F8FAFC; border: 1px solid var(--border)">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-amber-700" style="background:#FEF3C7">
+                                <span class="material-symbols-outlined text-lg">supervisor_account</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Carlos Mendes</div>
+                                <div class="text-xs text-slate-400">Gestor · Engenharia</div>
                             </div>
                         </div>
                     </div>
-                </section>
+                </div>
             </div>
         </div>
 
-        <div id="visao-painel-gestao" class="hidden space-y-6">
-            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-deep-navy" id="titulo-fila-gestao">Fila de Novos Colaboradores</h2>
-                        <p class="text-xs text-slate-gray mt-0.5" id="desc-fila-gestao">Valida as exigências da tua área. Ao aprovar, o processo passa automaticamente para o departamento seguinte.</p>
-                    </div>
+        <!-- ─── Visão: Gestão ─── -->
+        <div id="visao-painel-gestao" class="hidden flex flex-col gap-6">
+
+            <div class="card-section p-6 flex flex-col gap-5">
+                <div style="border-bottom: 1px solid var(--border)" class="pb-4">
+                    <h2 class="text-base font-bold text-slate-900" id="titulo-fila-gestao">Fila Operacional</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="desc-fila-gestao">Valide as demandas da sua área para avançar o processo.</p>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div class="overflow-x-auto -mx-1">
+                    <table>
                         <thead>
-                            <tr class="bg-surface-container-low text-slate-gray text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 rounded-tl-lg">Colaborador</th>
-                                <th class="p-4">Etapa Atual</th>
-                                <th class="p-4">Setor Responsável</th>
-                                <th class="p-4">Estado</th>
-                                <th class="p-4">Prazo Limite</th>
-                                <th class="p-4 text-center rounded-tr-lg">Ação Reativa</th>
+                            <tr>
+                                <th class="text-left rounded-tl-lg">Colaborador</th>
+                                <th class="text-left">Etapa</th>
+                                <th class="text-left">Responsável</th>
+                                <th class="text-left">Status</th>
+                                <th class="text-left">Prazo</th>
+                                <th class="text-center rounded-tr-lg">Ação</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm divide-y divide-slate-100">
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="p-4 font-bold text-deep-navy">Pedro Alencar</td>
-                                <td class="p-4">
-                                    <span id="tabela-etapa-badge" class="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200/60 text-slate-700">DOCUMENTACAO_RH</span>
-                                </td>
-                                <td class="p-4 font-semibold text-primary" id="tabela-setor-responsavel">RH</td>
-                                <td class="p-4" id="tabela-estado-badge">
-                                    <span class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800">⏳ EM ANDAMENTO</span>
-                                </td>
-                                <td class="p-4 text-xs text-slate-gray font-medium">23/05/2026</td>
-                                <td class="p-4 text-center">
-                                    <div id="container-botao-acao-gestao">
-                                        </div>
-                                </td>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold text-slate-900">Pedro Alencar</td>
+                                <td><span id="tabela-etapa-badge" class="font-mono text-xs px-2 py-1 rounded" style="background:#F1F5F9; color:#475569; font-size:11px">DOCUMENTACAO_RH</span></td>
+                                <td class="font-semibold text-blue-600" id="tabela-setor-responsavel">RH</td>
+                                <td id="tabela-estado-badge"><span class="chip chip-amber">⏳ Em andamento</span></td>
+                                <td class="text-xs text-slate-400 font-medium">23/05/2026</td>
+                                <td class="text-center"><div id="container-botao-acao-gestao"></div></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="mt-4 bg-surface-container-low rounded-xl p-6 border border-slate-200/60">
-                    <h3 class="text-xs font-bold text-deep-navy uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm text-primary">fact_check</span> 
-                        Checklist Interno Técnico - Detalhes da Demanda
+                <!-- Checklist interno -->
+                <div class="rounded-xl p-5" style="background:#F8FAFC; border: 1px solid var(--border)">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-400" style="font-size:15px">fact_check</span>
+                        Checklist Interno da Demanda
                     </h3>
-                    <div id="checklist-demandas-setor" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        </div>
+                    <div id="checklist-demandas-setor" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
                 </div>
             </div>
         </div>
@@ -273,309 +346,253 @@
 </main>
 
 <script>
-    // ESTADO CENTRAL DA SANDBOX (Substitui as chamadas de banco durante o Pitch)
     let estadoOnboarding = {
         colaborador_nome: "Pedro Alencar",
-        etapa_atual: "DOCUMENTACAO_RH", // DOCUMENTACAO_RH -> ACESSOS_TI -> APRESENTACAO_GESTOR -> CONCLUIDO
-        status_etapa: "PENDENTE",
+        etapa_atual: "DOCUMENTACAO_RH",
         prazo_limite: "23/05/2026"
     };
 
-    // Aba de visualização atual da Sandbox
     let sessaoAtiva = 'colaborador';
 
-    // Configuração das visões de Gestão (Copiado fielmente do seu mapeamento antigo)
-    const roleConfigMapeamento = {
-        'rh': { nome: "Recursos Humanos", icon: "badge", desc: "Fila de Contratos. Analisa e aprova a documentação para avançar o processo para a TI." },
-        'ti': { nome: "Equipa de TI", icon: "desktop_mac", desc: "Fila de Infraestrutura. Prepara os acessos e o hardware antes de notificar o Gestor." },
-        'gestor': { nome: "Gestor de Área", icon: "supervisor_account", desc: "Acompanha e valida a integração e os objetivos da tua equipa para fechar o processo." }
+    const roleConfig = {
+        'rh':     { nome: "Recursos Humanos", icon: "badge",              label: "RH",      desc: "Analise e aprove a documentação do colaborador para avançar para a TI." },
+        'ti':     { nome: "Equipe de TI",      icon: "desktop_mac",       label: "TI",      desc: "Prepare os acessos e hardware do colaborador antes de notificar o Gestor." },
+        'gestor': { nome: "Gestor de Área",    icon: "supervisor_account", label: "Gestor", desc: "Acompanhe e conclua a integração do colaborador na sua equipe." }
     };
 
-    // Roteiro completo do Pedro com as demandas internas solicitadas
     const roteiroConfig = [
         {
             chave: 'DOCUMENTACAO_RH',
-            titulo: 'Fase 1: Documentação com o RH',
-            desc: 'Envio de documentações obrigatórias e formalização legal do contrato.',
-            tarefas: ['Assinatura do Contrato de Trabalho Digital', 'Envio de Documentações de Identificação (RG/CPF)', 'Preenchimento do Plano de Benefícios']
+            titulo: 'Fase 1 — Documentação com o RH',
+            desc: 'Formalização legal e envio de documentos obrigatórios.',
+            tarefas: ['Assinatura do Contrato de Trabalho Digital', 'Envio de Documentos de Identificação (RG/CPF)', 'Preenchimento do Plano de Benefícios']
         },
         {
             chave: 'ACESSOS_TI',
-            titulo: 'Fase 2: Preparação e Acessos da TI',
-            desc: 'Abertura das contas corporativas e provisionamento seguro do hardware.',
-            tarefas: ['Configuração do E-mail Corporativo', 'Provisionamento e Setup do Notebook', 'Geração de Credenciais de Acesso e VPN']
+            titulo: 'Fase 2 — Preparação pela TI',
+            desc: 'Criação de contas corporativas e provisionamento do hardware.',
+            tarefas: ['Configuração do E-mail Corporativo', 'Provisionamento e Setup do Notebook', 'Geração de Credenciais e VPN']
         },
         {
             chave: 'APRESENTACAO_GESTOR',
-            titulo: 'Fase 3: Alinhamento e Integração com o Gestor',
-            desc: 'Boas-vindas oficiais, apresentação da equipe e definição do plano de metas.',
-            tarefas: ['Reunião de Alinhamento Individual (1on1)', 'Apresentação Oficial para o Time de Engenharia', 'Definição das Metas dos Primeiros 30 Dias']
+            titulo: 'Fase 3 — Alinhamento com o Gestor',
+            desc: 'Boas-vindas, apresentação de equipe e definição de metas.',
+            tarefas: ['Reunião de Alinhamento 1:1', 'Apresentação para o Time de Engenharia', 'Definição das Metas dos Primeiros 30 Dias']
         }
     ];
 
-    // Alternador de Telas Integrado
     function alternarSessaoSimulada(sessao) {
         sessaoAtiva = sessao;
 
-        // Reset visual das abas laterais
         ['colaborador', 'rh', 'ti', 'gestor'].forEach(s => {
             const btn = document.getElementById(`nav-btn-${s}`);
-            if(btn) {
-                btn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white text-xs font-semibold transition-all";
-            }
+            if (btn) btn.className = "role-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent text-xs font-medium";
         });
 
-        // Destacar o botão clicado
         const btnAtivo = document.getElementById(`nav-btn-${sessao}`);
-        if(btnAtivo) btnAtivo.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-primary-container text-white text-xs font-semibold transition-all";
+        if (btnAtivo) btnAtivo.className = "role-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-white text-xs font-medium";
 
-        // Mudar metadados de contexto no painel de identificação
-        const roleIcon = document.getElementById('nav-role-icon');
-        const roleName = document.getElementById('nav-role-name');
-        const badgeContexto = document.getElementById('badge-perfil-contexto');
-        const caminhoContexto = document.getElementById('header-caminho-contexto');
-
-        roleName.innerText = sessao.toUpperCase();
+        const roleIcon  = document.getElementById('nav-role-icon');
+        const roleName  = document.getElementById('nav-role-name');
+        const roleLabel = document.getElementById('nav-role-label');
+        const badge     = document.getElementById('badge-perfil-contexto');
+        const caminho   = document.getElementById('header-caminho-contexto');
 
         if (sessao === 'colaborador') {
-            roleIcon.innerText = "person";
-            badgeContexto.innerText = "Pedro Alencar";
-            caminhoContexto.innerText = "Dashboard Pessoal do Candidato";
-            
+            roleIcon.innerText  = "person";
+            roleName.innerText  = "Pedro Alencar";
+            roleLabel.innerText = "Colaborador";
+            badge.innerText     = "Pedro Alencar";
+            caminho.innerText   = "Dashboard do Candidato";
             document.getElementById('visao-painel-colaborador').classList.remove('hidden');
             document.getElementById('visao-painel-gestao').classList.add('hidden');
-            
-            // Remove o alerta visual ao abrir a própria tela
             document.getElementById('notif-aba-rh').classList.add('hidden');
-            
             renderizarDashboardPedro();
         } else {
-            roleIcon.innerText = roleConfigMapeamento[sessao].icon;
-            badgeContexto.innerText = `Mesa: ${roleConfigMapeamento[sessao].nome}`;
-            caminhoContexto.innerText = `Visão Operacional / ${roleConfigMapeamento[sessao].nome}`;
-            
+            const rc = roleConfig[sessao];
+            roleIcon.innerText  = rc.icon;
+            roleName.innerText  = document.querySelector(`#nav-btn-${sessao} .font-semibold`).innerText;
+            roleLabel.innerText = rc.label;
+            badge.innerText     = `Mesa: ${rc.nome}`;
+            caminho.innerText   = `Operacional · ${rc.nome}`;
             document.getElementById('visao-painel-colaborador').classList.add('hidden');
             document.getElementById('visao-painel-gestao').classList.remove('hidden');
-            
-            // Remove o indicador visual da aba clicada
             document.getElementById(`notif-aba-${sessao}`).classList.add('hidden');
-            
-            renderizarPainelGestaoColetivo(sessao);
+            renderizarPainelGestao(sessao);
         }
     }
 
-    // GERAÇÃO DA TELA DO PEDRO (Fiel à sua estrutura antiga, mas reativa ao Estado Global)
     function renderizarDashboardPedro() {
-        let porcentagem = 15;
-        let fasesConcluidasTxt = "0 de 3 Fases";
-        let faseAtualExibicao = "Fase 1: Envio e Validação de Documentos com o RH";
+        let pct = 15, fasesTxt = "0 de 3 fases", faseTxt = "Fase 1: Envio e Validação de Documentos com o RH";
+        if (estadoOnboarding.etapa_atual === 'ACESSOS_TI')         { pct = 50;  fasesTxt = "1 de 3 fases"; faseTxt = "Fase 2: Provisionamento de Máquina e Contas pela TI"; }
+        if (estadoOnboarding.etapa_atual === 'APRESENTACAO_GESTOR'){ pct = 85;  fasesTxt = "2 de 3 fases"; faseTxt = "Fase 3: Alinhamento de Metas e Boas-Vindas com o Gestor"; }
+        if (estadoOnboarding.etapa_atual === 'CONCLUIDO')          { pct = 100; fasesTxt = "3 de 3 fases"; faseTxt = "Onboarding concluído — você está 100% operacional!"; }
 
-        if (estadoOnboarding.etapa_atual === 'ACESSOS_TI') {
-            porcentagem = 50; fasesConcluidasTxt = "1 de 3 Fases";
-            faseAtualExibicao = "Fase 2: Provisionamento de Máquina e Contas pela TI";
-        } else if (estadoOnboarding.etapa_atual === 'APRESENTACAO_GESTOR') {
-            porcentagem = 85; fasesConcluidasTxt = "2 de 3 Fases";
-            faseAtualExibicao = "Fase 3: Alinhamento de Metas e Boas-Vindas com o Gestor";
-        } else if (estadoOnboarding.etapa_atual === 'CONCLUIDO') {
-            porcentagem = 100; fasesConcluidasTxt = "3 de 3 Fases";
-            faseAtualExibicao = "Onboarding Finalizado! Você está 100% operacional.";
-        }
+        document.getElementById('hero-fase-txt').innerText = faseTxt;
+        document.getElementById('pizza-porcentagem').innerText = `${pct}%`;
+        document.getElementById('nav-badge-colab').innerText = `${pct}%`;
+        document.getElementById('pizza-fases-concluidas').innerText = fasesTxt;
+        document.getElementById('svg-progresso-path').setAttribute('stroke-dasharray', `${pct}, 100`);
 
-        document.getElementById('hero-fase-txt').innerText = faseAtualExibicao;
-        document.getElementById('pizza-porcentagem').innerText = `${porcentagem}%`;
-        document.getElementById('nav-badge-colab').innerText = `${porcentagem}%`;
-        document.getElementById('pizza-fases-concluidas').innerText = fasesConcluidasTxt;
-        document.getElementById('svg-progresso-path').setAttribute('stroke-dasharray', `${porcentagem}, 100`);
-
-        // Renderização da caixa de gargalo
-        const alertaContainer = document.getElementById('container-alerta-gargalo');
+        // Alerta de status
+        const alertaEl = document.getElementById('container-alerta-gargalo');
         if (estadoOnboarding.etapa_atual !== 'CONCLUIDO') {
-            const responsavel = estadoOnboarding.etapa_atual === 'DOCUMENTACAO_RH' ? 'RH' : estadoOnboarding.etapa_atual === 'ACESSOS_TI' ? 'TI' : 'GESTÃO';
-            alertaContainer.innerHTML = `
-                <div class="p-5 rounded-xl border-l-4 shadow-sm flex items-start gap-4 bg-amber-50 border-amber-500 text-amber-950">
-                    <div class="p-2 rounded-lg bg-amber-100 text-amber-600 flex shrink-0"><span class="material-symbols-outlined">schedule</span></div>
-                    <div class="flex-1">
-                        <h4 class="font-bold text-sm md:text-base">Status Atual do seu Processo</h4>
-                        <p class="text-xs md:text-sm mt-1 opacity-90 leading-relaxed">
-                            Seu onboarding encontra-se sob responsabilidade direta do departamento de <span class="underline font-black tracking-wide text-primary-container">${responsavel}</span> pendente de validação na etapa <strong>${estadoOnboarding.etapa_atual.replace('_', ' ')}</strong>.
+            const resp = { DOCUMENTACAO_RH: 'RH', ACESSOS_TI: 'TI', APRESENTACAO_GESTOR: 'Gestor' }[estadoOnboarding.etapa_atual];
+            alertaEl.innerHTML = `
+                <div class="alert-warn flex items-start gap-3 px-5 py-4 rounded-xl">
+                    <span class="material-symbols-outlined text-amber-500 shrink-0" style="font-size:18px">schedule</span>
+                    <div>
+                        <p class="text-sm font-semibold mb-0.5">Processo em andamento</p>
+                        <p class="text-xs leading-relaxed opacity-80">
+                            Seu onboarding está sob responsabilidade do departamento de <strong>${resp}</strong>, aguardando validação na etapa <span class="font-mono font-bold">${estadoOnboarding.etapa_atual.replace('_',' ')}</span>.
                         </p>
                     </div>
-                </div>
-            `;
+                </div>`;
         } else {
-            alertaContainer.innerHTML = `
-                <div class="p-5 bg-emerald-50 border-l-4 border-success text-emerald-950 rounded-xl shadow-sm flex items-start gap-4">
-                    <div class="p-2 bg-emerald-100 text-success rounded-lg flex shrink-0"><span class="material-symbols-outlined">verified</span></div>
+            alertaEl.innerHTML = `
+                <div class="alert-success flex items-start gap-3 px-5 py-4 rounded-xl">
+                    <span class="material-symbols-outlined text-emerald-600 shrink-0" style="font-size:18px">verified</span>
                     <div>
-                        <h4 class="font-bold text-base">Parabéns! Integração Concluída 🎉</h4>
-                        <p class="text-sm mt-1 opacity-90 leading-relaxed">Seu ecossistema de contratação e ferramentas está totalmente ativo na SBK. Bem-vindo a bordo!</p>
+                        <p class="text-sm font-semibold mb-0.5">Integração concluída 🎉</p>
+                        <p class="text-xs opacity-80">Seu ecossistema de acesso e ferramentas está totalmente ativo. Bem-vindo à equipe!</p>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
-        // Montagem do Roteiro Linear
-        const listaFasesContainer = document.getElementById('lista-fases-dinamica');
-        listaFasesContainer.innerHTML = '';
-        let encontrouEtapaAtiva = false;
+        // Roteiro linear
+        const listaEl = document.getElementById('lista-fases-dinamica');
+        listaEl.innerHTML = '';
+        let passouAtual = false;
 
-        roteiroConfig.forEach((fase) => {
-            let isCurrent = estadoOnboarding.etapa_atual === fase.chave;
-            let isPassed = !encontrouEtapaAtiva && estadoOnboarding.etapa_atual !== fase.chave && estadoOnboarding.etapa_atual !== 'CONCLUIDO';
-            
-            if (isCurrent) encontrouEtapaAtiva = true;
-            if (estadoOnboarding.etapa_atual === 'CONCLUIDO') isPassed = true;
+        roteiroConfig.forEach((fase, idx) => {
+            const isCurrent = estadoOnboarding.etapa_atual === fase.chave;
+            const isConcluido = estadoOnboarding.etapa_atual === 'CONCLUIDO';
+            const isDone = isConcluido || (!passouAtual && !isCurrent);
+            if (isCurrent) passouAtual = true;
+
+            const isLast = idx === roteiroConfig.length - 1;
 
             if (isCurrent) {
-                listaFasesContainer.innerHTML += `
-                    <div class="relative z-10 flex gap-4">
-                        <div class="w-9 h-9 rounded-full bg-primary-container text-white flex items-center justify-center shrink-0 border-4 border-white shadow-sm ring-2 ring-lime-accent/50 ring-offset-2">
-                            <span class="material-symbols-outlined text-xl">pending</span>
+                listaEl.innerHTML += `
+                <div class="relative flex gap-4">
+                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
+                    <div class="step-icon active shrink-0 z-10">
+                        <span class="material-symbols-outlined" style="font-size:16px">pending</span>
+                    </div>
+                    <div class="flex-1 pb-2">
+                        <div class="flex items-center justify-between mb-0.5">
+                            <h3 class="text-sm font-bold text-blue-700">${fase.titulo}</h3>
+                            <span class="chip chip-blue">Em andamento</span>
                         </div>
-                        <div class="flex-col pt-1 w-full">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-bold text-primary">${fase.titulo}</h3>
-                                <span class="bg-lime-accent/20 text-primary-container px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Em Andamento</span>
-                            </div>
-                            <p class="text-xs text-slate-gray mt-0.5 mb-3">${fase.desc}</p>
-                            <div class="bg-surface-container-low rounded-lg border border-slate-200/60 p-4 flex flex-col gap-3 shadow-inner">
-                                ${fase.tarefas.map(tarefa => `
-                                    <label class="flex items-start gap-3">
-                                        <input class="mt-0.5 rounded border-slate-300 text-primary w-4 h-4" type="checkbox" disabled>
-                                        <span class="text-xs md:text-sm text-on-surface font-semibold">${tarefa} <span class="text-[10px] text-amber-600 font-mono">(Aguardando aprovação interna)</span></span>
-                                    </label>
-                                `).join('')}
-                            </div>
+                        <p class="text-xs text-slate-400 mb-3">${fase.desc}</p>
+                        <div class="flex flex-col gap-2.5 p-4 rounded-lg" style="background:#F8FAFC; border:1px solid var(--border)">
+                            ${fase.tarefas.map(t => `
+                                <label class="flex items-start gap-3 cursor-default">
+                                    <input type="checkbox" disabled class="mt-0.5 rounded w-4 h-4" style="border-color:#CBD5E1">
+                                    <span class="text-xs font-medium text-slate-700">${t} <span class="font-mono text-amber-600" style="font-size:10px">· aguardando aprovação</span></span>
+                                </label>`).join('')}
                         </div>
                     </div>
-                `;
-            } else if (isPassed) {
-                listaFasesContainer.innerHTML += `
-                    <div class="relative z-10 flex gap-4 opacity-75">
-                        <div class="w-9 h-9 rounded-full bg-success text-white flex items-center justify-center shrink-0 border-4 border-white shadow-sm">
-                            <span class="material-symbols-outlined text-xl">check_circle</span>
-                        </div>
-                        <div class="flex flex-col pt-1 w-full">
-                            <h3 class="text-sm font-bold text-success">${fase.titulo}</h3>
-                            <p class="text-xs text-slate-gray mt-0.5 mb-2">Fase validada no banco de dados e concluída com sucesso pelo setor responsável.</p>
-                            <div class="bg-slate-100/80 rounded-lg p-3 flex flex-col gap-1.5 border border-slate-200/40">
-                                ${fase.tarefas.map(tarefa => `
-                                    <div class="flex items-center gap-2 text-xs text-slate-500 line-through">
-                                        <span class="material-symbols-outlined text-xs text-success">done</span> ${tarefa}
-                                    </div>
-                                `).join('')}
-                            </div>
+                </div>`;
+            } else if (isDone) {
+                listaEl.innerHTML += `
+                <div class="relative flex gap-4 opacity-70">
+                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
+                    <div class="step-icon done shrink-0 z-10">
+                        <span class="material-symbols-outlined" style="font-size:16px">check</span>
+                    </div>
+                    <div class="flex-1 pb-2">
+                        <h3 class="text-sm font-bold text-emerald-700 mb-0.5">${fase.titulo}</h3>
+                        <p class="text-xs text-slate-400 mb-2">Concluída e validada pelo setor responsável.</p>
+                        <div class="flex flex-col gap-1.5">
+                            ${fase.tarefas.map(t => `
+                                <div class="flex items-center gap-2 text-xs text-slate-400 line-through">
+                                    <span class="material-symbols-outlined text-emerald-500" style="font-size:13px">done</span> ${t}
+                                </div>`).join('')}
                         </div>
                     </div>
-                `;
+                </div>`;
             } else {
-                listaFasesContainer.innerHTML += `
-                    <div class="relative z-10 flex gap-4 opacity-30">
-                        <div class="w-9 h-9 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 border-4 border-white shadow-sm">
-                            <span class="material-symbols-outlined text-xl">lock</span>
-                        </div>
-                        <div class="flex flex-col pt-1">
-                            <h3 class="text-sm font-bold text-deep-navy">${fase.titulo}</h3>
-                            <p class="text-xs text-slate-gray mt-0.5">Aguardando a conclusão dos pré-requisitos das fases anteriores.</p>
-                        </div>
+                listaEl.innerHTML += `
+                <div class="relative flex gap-4 opacity-35">
+                    ${!isLast ? '<div class="phase-connector"></div>' : ''}
+                    <div class="step-icon locked shrink-0 z-10">
+                        <span class="material-symbols-outlined" style="font-size:16px">lock</span>
                     </div>
-                `;
+                    <div class="flex-1 pb-2">
+                        <h3 class="text-sm font-bold text-slate-700 mb-0.5">${fase.titulo}</h3>
+                        <p class="text-xs text-slate-400">Aguardando a conclusão das fases anteriores.</p>
+                    </div>
+                </div>`;
             }
         });
     }
 
-    // GERAÇÃO DA INTERFACE COMPARTILHADA DOS DEPARTAMENTOS
-    function renderizarPainelGestaoColetivo(setorLogado) {
-        const config = roleConfigMapeamento[setorLogado];
-        document.getElementById('titulo-fila-gestao').innerText = `Fila Operacional: ${config.nome}`;
-        document.getElementById('desc-fila-gestao').innerText = config.desc;
-
-        // Atualização da linha mestre da tabela corporativa
+    function renderizarPainelGestao(setor) {
+        const rc = roleConfig[setor];
+        document.getElementById('titulo-fila-gestao').innerText = `Fila Operacional · ${rc.nome}`;
+        document.getElementById('desc-fila-gestao').innerText = rc.desc;
         document.getElementById('tabela-etapa-badge').innerText = estadoOnboarding.etapa_atual;
-        
-        const tabelaResponsavel = document.getElementById('tabela-setor-responsavel');
-        tabelaResponsavel.innerText = estadoOnboarding.etapa_atual === 'DOCUMENTACAO_RH' ? 'RH' : estadoOnboarding.etapa_atual === 'ACESSOS_TI' ? 'TI' : estadoOnboarding.etapa_atual === 'APRESENTACAO_GESTOR' ? 'GESTOR' : 'NENHUM';
 
-        const estadoBadge = document.getElementById('tabela-estado-badge');
+        const respMap = { DOCUMENTACAO_RH: 'RH', ACESSOS_TI: 'TI', APRESENTACAO_GESTOR: 'Gestor', CONCLUIDO: '—' };
+        document.getElementById('tabela-setor-responsavel').innerText = respMap[estadoOnboarding.etapa_atual] || '—';
+
+        const estadoBadge    = document.getElementById('tabela-estado-badge');
         const containerBotao = document.getElementById('container-botao-acao-gestao');
-        const containerChecklist = document.getElementById('checklist-demandas-setor');
+        const checklist      = document.getElementById('checklist-demandas-setor');
 
-        // Mapear se a etapa atual do banco pertence a esta mesa ligada
-        let mapeamentoChaves = { 'rh': 'DOCUMENTACAO_RH', 'ti': 'ACESSOS_TI', 'gestor': 'APRESENTACAO_GESTOR' };
-        let pertenceAEstaMesa = (estadoOnboarding.etapa_atual === mapeamentoChaves[setorLogado]);
+        const chaveMap = { rh: 'DOCUMENTACAO_RH', ti: 'ACESSOS_TI', gestor: 'APRESENTACAO_GESTOR' };
+        const pertence = estadoOnboarding.etapa_atual === chaveMap[setor];
 
         if (estadoOnboarding.etapa_atual === 'CONCLUIDO') {
-            estadoBadge.innerHTML = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-success">✅ TUDO CONCLUÍDO</span>`;
-            containerBotao.innerHTML = `<span class="text-xs text-success font-medium italic">Processo Finalizado</span>`;
-            containerChecklist.innerHTML = `<p class="text-xs text-slate-500 col-span-2">Nenhuma demanda ativa. Pedro está integrado.</p>`;
+            estadoBadge.innerHTML    = `<span class="chip chip-green">✅ Concluído</span>`;
+            containerBotao.innerHTML = `<span class="text-xs text-emerald-600 font-medium italic">Processo finalizado</span>`;
+            checklist.innerHTML      = `<p class="text-xs text-slate-400 col-span-2">Nenhuma demanda ativa. Pedro Alencar está integrado.</p>`;
             return;
         }
 
-        if (pertenceAEstaMesa) {
-            estadoBadge.innerHTML = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800 animate-pulse">⏳ SUAS DEMANDAS</span>`;
-            
-            let txtBotao = "Aprovar Contrato e Acionar TI";
-            if (setorLogado === 'ti') txtBotao = "Finalizar Infra e Liberar para Gestor";
-            if (setorLogado === 'gestor') txtBotao = "Validar Check-in e Concluir Onboarding";
+        if (pertence) {
+            estadoBadge.innerHTML = `<span class="chip chip-amber" style="animation: ping-slow 2s ease-in-out infinite">⏳ Suas demandas</span>`;
+
+            const txtBotao = setor === 'rh' ? 'Aprovar e Acionar TI'
+                           : setor === 'ti' ? 'Finalizar e Liberar para Gestor'
+                           : 'Validar Check-in e Concluir';
 
             containerBotao.innerHTML = `
-                <button onclick="executarTransicaoAvanco('${setorLogado}')" 
-                    class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-sm hover:bg-primary-container transition-all flex items-center gap-1 mx-auto active:scale-95 cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                <button onclick="executarTransicaoAvanco('${setor}')" class="btn-primary">
+                    <span class="material-symbols-outlined" style="font-size:15px">check_circle</span>
                     ${txtBotao}
-                </button>
-            `;
+                </button>`;
 
-            // Renderizar demandas internas detalhadas do setor para dar volume no MVP
-            let dadosFaseAtual = roteiroConfig.find(f => f.chave === estadoOnboarding.etapa_atual);
-            containerChecklist.innerHTML = dadosFaseAtual.tarefas.map(t => `
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200">
-                    <input type="checkbox" checked class="rounded border-slate-300 text-primary w-4 h-4">
-                    <span class="text-xs font-semibold text-deep-navy">${t}</span>
-                </div>
-            `).join('');
-
+            const fase = roteiroConfig.find(f => f.chave === estadoOnboarding.etapa_atual);
+            checklist.innerHTML = fase.tarefas.map(t => `
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-white" style="border:1px solid var(--border)">
+                    <input type="checkbox" checked class="rounded w-4 h-4" style="accent-color:#3B82F6">
+                    <span class="text-xs font-medium text-slate-700">${t}</span>
+                </div>`).join('');
         } else {
-            estadoBadge.innerHTML = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-400">🔒 BLOQUEADO</span>`;
-            containerBotao.innerHTML = `<span class="text-xs text-slate-gray font-medium italic block text-center">Aguardando setores anteriores</span>`;
-            containerChecklist.innerHTML = `<p class="text-xs text-slate-400 col-span-2">O processo de Pedro Alencar está atualmente na mesa do <strong>${tabelaResponsavel.innerText}</strong>.</p>`;
+            estadoBadge.innerHTML    = `<span class="chip chip-slate">🔒 Bloqueado</span>`;
+            containerBotao.innerHTML = `<span class="text-xs text-slate-400 italic">Aguardando setores anteriores</span>`;
+            checklist.innerHTML      = `<p class="text-xs text-slate-400 col-span-2">O processo de Pedro Alencar está atualmente na mesa do <strong>${document.getElementById('tabela-setor-responsavel').innerText}</strong>.</p>`;
         }
     }
 
-    // MOTOR REATIVO: GERENCIA AS NOTIFICAÇÕES LATERAIS E AVANÇOS DE FILA
-    function executarTransicaoAvanco(setorQueAprovou) {
-        const log = document.getElementById('simulador-log-texto');
-
-        if (setorQueAprovou === 'rh') {
+    function executarTransicaoAvanco(setor) {
+        if (setor === 'rh') {
             estadoOnboarding.etapa_atual = 'ACESSOS_TI';
-            log.innerText = "Mariana (RH) aprovou! Um ticket foi criado automaticamente no Jira/Fila da TI. Alerta visual emitido.";
-            
-            // Ativa o alerta ao lado do botão da TI na barra lateral
             document.getElementById('notif-aba-ti').classList.remove('hidden');
-            
-            // Joga a visão direto para a TI para mostrar a automação acontecendo na hora
             alternarSessaoSimulada('ti');
-        } 
-        else if (setorQueAprovou === 'ti') {
+        } else if (setor === 'ti') {
             estadoOnboarding.etapa_atual = 'APRESENTACAO_GESTOR';
-            log.innerText = "TI finalizou a máquina e contas! Notificação de alinhamento enviada para o painel do Gestor.";
-            
             document.getElementById('notif-aba-gestor').classList.remove('hidden');
             alternarSessaoSimulada('gestor');
-        } 
-        else if (setorQueAprovou === 'gestor') {
+        } else if (setor === 'gestor') {
             estadoOnboarding.etapa_atual = 'CONCLUIDO';
-            log.innerText = "Carlos Mendes (Gestor) realizou o 1on1. Onboarding encerrado. Pedro Alencar está 100% integrado.";
-            
             alternarSessaoSimulada('colaborador');
         }
     }
 
-    // Inicialização da sandbox
-    window.onload = function() {
-        renderizarDashboardPedro();
-    };
+    window.onload = () => renderizarDashboardPedro();
 </script>
-
 </body>
 </html>
